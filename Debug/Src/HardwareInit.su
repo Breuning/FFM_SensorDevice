@@ -1,0 +1,5 @@
+HardwareInit.c:20:6:Hardware_Init	8	static
+HardwareInit.c:33:6:Get_SensorType	24	static
+HardwareInit.c:59:6:Get_SensorID	24	static
+HardwareInit.c:64:6:Sensor_Init	8	static
+HardwareInit.c:88:6:RS485_Init	8	static

@@ -1,0 +1,6 @@
+RS485Analysis.c:17:6:RS485Analysis	8	static
+RS485Analysis.c:37:6:MasterData_Analysis	4	static
+RS485Analysis.c:43:6:ModbusData_Analysis	16	static
+RS485Analysis.c:75:6:ModBus_SersorData_Ack	16	static
+RS485Analysis.c:112:6:RS485Uart_RX_TX_Switch	16	static
+RS485Analysis.c:194:10:CRC16	24	static
