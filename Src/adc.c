@@ -196,7 +196,7 @@ uint16_t Get_WindowPos(void)
 
 
 
-
+/*
 static float calPostionPercent(uint32_t origin,ref_stype_t type)
 {
 	hcfg_t *hcfg = CFG_get();
@@ -206,13 +206,13 @@ static float calPostionPercent(uint32_t origin,ref_stype_t type)
 
 	if(type == ref_SENSOR_POSITION1)
 	{
-		/*计算电压*/
+		//计算电压
 		ret =  ((float)origin / 4096.0 * 3.3);
-		/*计算电阻*/
+		//计算电阻
 		r = ntc_PUSH_UP_RESISTOR_KR  / (3.3/ret - 1);
-		/*计算电阻增量*/
+		//计算电阻增量
 		r -= hcfg->sw.align.Base1;
-		/*计算电阻变化的百分比*/
+		//计算电阻变化的百分比
 		ret = r / (hcfg->sw.align.full1 - hcfg->sw.align.Base1) * 100.0;
 	}
 	else if (type == ref_SENSOR_POSITION2)
@@ -243,6 +243,8 @@ static float calPostionPercent(uint32_t origin,ref_stype_t type)
 }
 
 #define ntc_PUSH_UP_RESISTOR_KR (float)10.0
+*/
+
 
 /* USER CODE END 1 */
 
