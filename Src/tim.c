@@ -22,7 +22,7 @@
 
 /* USER CODE BEGIN 0 */
 #include "SensorAnalysis.h"
-
+#include "CanAnalysis.h"
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim2;
@@ -230,17 +230,30 @@ void Delay_us(uint16_t us)                                     //ÀûÓÃTIM2ÊµÏÖusÑ
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)     //¶¨Ê±Æ÷ÖÐ¶Ï»Øµ÷º¯Êý
 {
+	static uint8_t Time_cnt = 0;
+
 	if(htim == &htim3) // TIM3¶¨Ê±1s½øÀ´Ò»´Î
 	{
 		HAL_GPIO_TogglePin(LED1_RUNNING_GPIO_Port, LED1_RUNNING_Pin); //ÔËÐÐµÆ·´×ª
+
+		CanDataSendTimerFlag = TRUE;
 	}
 
 
 	if(htim == &htim5) // TIM5¶¨Ê±5s½øÀ´Ò»´Î
     {
     	SensorReadTimerFlag = TRUE;
+    	Time_cnt++;
 //    	htim->Instance->CNT = 0;                               		  //Ã¿´ÎÖÐ¶Ï»Øµ÷º¯ÊýÖ´ÐÐºó½øÐÐ¼ÆÊýÆ÷ÇåÁã
     }
+
+	if(Time_cnt >= 12)
+	{ //1Min
+
+		__disable_fault_irq();
+		NVIC_SystemReset();
+		Time_cnt = 0;
+	}
 }
 /* USER CODE END 1 */
 

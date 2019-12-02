@@ -1,7 +1,7 @@
 /*
  * CanAnalysis.c
  *
- *  Created on: 2019年8月13日
+ *  Created on: 2019年11月20日
  *      Author: Breuning
  */
 #include <string.h>
@@ -11,67 +11,97 @@
 #include "HardwareInit.h"
 #include "SensorAnalysis.h"
 
-
-uint32_t CanSensor_FrameID;
-CanSensor_t  CanSensor_Type;
-
-static uint32_t Get_CanSensor_FrameID(uint8_t sensorid);
+static uint16_t Get_CanSensor_FrameID(uint8_t sensorid);
 static CanSensor_t Get_CanSensor_Type(uint8_t sensorid);
+static void Can_TxSensorData(FloatSensorDataType type);
+
+uint16_t CanSensor_FrameID;
+uint16_t CanSensor_FrameID_Hum;
+CanSensor_t  CanSensor_Type;
+CanSensor_t  CanSensor_Type_Hum = 0;
+
+BOOL CanDataSendTimerFlag = FALSE;
 
 void CanAnalysis(void)
 {
 	uint32_t Tick_CanTx;
-	uint32_t SersorTimeout = 1000*10;
+	uint32_t SensorTimeout = 1000*10;
+
 	Tick_CanTx = HAL_GetTick();
 
-	FloatDataToArr_t CanSensorData;
-
-
-	if(Tick_CanTx - Tick_GetSensorData < SersorTimeout)
+	if(CanDataSendTimerFlag == TRUE)
 	{
-
-		Get_CanSensor_FrameID(Sensor_ID);
-
-		switch(Sensor_ID)
+		if(Tick_CanTx - Tick_GetSensorData < SensorTimeout)
 		{
-			case 1:
-			case 2:
-			case 3:
-			case 4:
-			case 5:
-				CanSensorData.FloatData = SensorData_Float[Temperature];
-				Can_TxMessage(StandardFrame, CanSensor_FrameID, 4, CanSensorData.TransformedDataBuf);
-				memset(CanSensorData.TransformedDataBuf, 0 , sizeof(CanSensorData.TransformedDataBuf));
 
-				CanSensorData.FloatData = SensorData_Float[Humidity];
-				Can_TxMessage(StandardFrame, CanSensor_FrameID, 4, CanSensorData.TransformedDataBuf);
-				memset(CanSensorData.TransformedDataBuf, 0 , sizeof(CanSensorData.TransformedDataBuf));
+			Get_CanSensor_FrameID(Sensor_ID);
 
-				break;
-			case 8:
-				CanSensorData.FloatData = SensorData_Float[CO2_Data];
-				Can_TxMessage(StandardFrame, CanSensor_FrameID, 4, CanSensorData.TransformedDataBuf);
-				memset(CanSensorData.TransformedDataBuf, 0 , sizeof(CanSensorData.TransformedDataBuf));
-				break;
-			case 9:
-				CanSensorData.FloatData = SensorData_Float[NH3_Data];
-				Can_TxMessage(StandardFrame, CanSensor_FrameID, 4, CanSensorData.TransformedDataBuf);
-				memset(CanSensorData.TransformedDataBuf, 0 , sizeof(CanSensorData.TransformedDataBuf));
-				break;
+			switch(CanSensor_Type)
+			{
+				case CanSensor_TYPE_TEMPERATURE:
+					Can_TxSensorData(Temperature);
+					break;
+				case CanSensor_TYPE_PRESSURE:
+					Can_TxSensorData(NegativePressure);
+					break;
+				case CanSensor_TYPE_GAS_CO2:
+					Can_TxSensorData(CO2_Data);
+					break;
+				case CanSensor_TYPE_GAS_NH3:
+					Can_TxSensorData(NH3_Data);
+					break;
+				default:
+					break;
+			}
+
+			HAL_Delay(100);
+
+			if(CanSensor_Type_Hum == CanSensor_TYPE_HUMIDITY)
+			{
+				Can_TxSensorData(Humidity);
+			}
 
 		}
+
+		CanDataSendTimerFlag = FALSE;
 	}
 }
 
-static uint32_t Get_CanSensor_FrameID(uint8_t sensorid)
+static void Can_TxSensorData(FloatSensorDataType type)
 {
-	StdIdResolve_t StdIdResolve;
+	FloatDataToArr_t CanSensorData;
 
-	StdIdResolve.Resolve.CanBoardType  = CanBoard_TYPE_SENSOR;
-	StdIdResolve.Resolve.CanSensorType = Get_CanSensor_Type(sensorid);
-	StdIdResolve.Resolve.CanSensorNum  = sensorid;
+	CanSensorData.FloatData = GetFloatSensorData(type);
+	if(type == Humidity)
+	{
+		Can_TxMessage(StandardFrame, CanSensor_FrameID_Hum, 4, CanSensorData.TransformedDataBuf);
+	}
+	else
+	{
+		Can_TxMessage(StandardFrame, CanSensor_FrameID, 4, CanSensorData.TransformedDataBuf);
+	}
 
-	CanSensor_FrameID = StdIdResolve.OriginId;
+	HAL_GPIO_TogglePin(LED2_MSGTX_GPIO_Port, LED2_MSGTX_Pin);      //发送1包数据后LED2反转一次
+
+	memset(CanSensorData.TransformedDataBuf, 0 , sizeof(CanSensorData.TransformedDataBuf));
+}
+
+static uint16_t Get_CanSensor_FrameID(uint8_t sensorid)
+{
+	CanIdConstruction_t StdCanId;
+
+	StdCanId.CanBoardType  = CanBoard_TYPE_SENSOR;
+	StdCanId.CanSensorType = Get_CanSensor_Type(sensorid);
+	StdCanId.CanSensorNum  = sensorid;
+
+	CanSensor_FrameID = (StdCanId.CanBoardType<<10) + (StdCanId.CanSensorType<<5) + StdCanId.CanSensorNum;
+
+	if(CanSensor_Type_Hum == CanSensor_TYPE_HUMIDITY)
+	{
+		StdCanId.CanSensorType = CanSensor_Type_Hum;
+		CanSensor_FrameID_Hum = (StdCanId.CanBoardType<<10) + (StdCanId.CanSensorType<<5) + StdCanId.CanSensorNum;
+	}
+
 	return CanSensor_FrameID;
 }
 
@@ -84,8 +114,8 @@ static CanSensor_t Get_CanSensor_Type(uint8_t sensorid)
 		CanSensor_TYPE_TEMPERATURE_HUMIDITY,
 		CanSensor_TYPE_TEMPERATURE_HUMIDITY,
 		CanSensor_TYPE_TEMPERATURE_HUMIDITY,
-		CanSensor_TYPE_OUT_TEMPERATURE_HUMIDITY,
-		CanSensor_TYPE_WATER_METER,
+		CanSensor_TYPE_TEMPERATURE_HUMIDITY,
+		CanSensor_TYPE_WATER_TEMPERATURE,
 		CanSensor_TYPE_PRESSURE,
 		CanSensor_TYPE_GAS_CO2,
 		CanSensor_TYPE_GAS_NH3,
@@ -94,6 +124,14 @@ static CanSensor_t Get_CanSensor_Type(uint8_t sensorid)
 	};
 
 	CanSensor_Type = CanSensorType[sensorid];
+
+	if(CanSensor_Type == CanSensor_TYPE_TEMPERATURE_HUMIDITY)
+	{
+		CanSensor_Type = CanSensor_TYPE_TEMPERATURE;
+		CanSensor_Type_Hum = CanSensor_TYPE_HUMIDITY;
+	}
+
+
 	return CanSensor_Type;
 }
 

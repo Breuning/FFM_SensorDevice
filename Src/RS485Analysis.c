@@ -5,6 +5,7 @@
  *      Author: Breuning
  */
 
+#include "string.h"
 #include "HardwareInit.h"
 #include "usart.h"
 #include "RS485Analysis.h"
@@ -12,6 +13,10 @@
 #include "Led.h"
 
 uint32_t Tick_RS485Ack;
+
+uint8_t Master51AckBuf[8] = {0};
+uint8_t Master52AckBuf[8] = {0};
+
 uint8_t ModbusAckBuf[9] = {0};
 
 void RS485Analysis(void)
@@ -21,7 +26,7 @@ void RS485Analysis(void)
 
 		if((RS485Uart_RX.RX_Buf[0] == 0xFF) && (RS485Uart_RX.RX_Buf[1] == 0xEE))             //环控自定义传输协议
 		{
-			MasterData_Analysis();
+//			MasterData_Analysis();
 		}
 
 		if((RS485Uart_RX.RX_Buf[0] != 0xFF) && (RS485Uart_RX.RX_Buf[1] == 0x03))             //Modbus标准传输协议，PLC传输过来
@@ -34,12 +39,103 @@ void RS485Analysis(void)
 	}
 }
 
-void MasterData_Analysis()
-{
 
+/****************************************************养殖大师环控自定义传输协议**************************************************************/
+/*
+void MasterData_Analysis(void)
+{
+	uint16_t Master_CrcVal;
+    uint16_t Master_CheckCrc;
+
+	if(RS485Uart_RX.rx_len != RS485Uart_RX.RX_Buf[MASTER_DATA_LEN_NUM])
+		return;
+
+	Master_CrcVal   = (RS485Uart_RX.RX_Buf[MASTER_CRCVAL_HIGH_NUM]<<8) | RS485Uart_RX.RX_Buf[MASTER_CRCVAL_LOW_NUM];  //数据包中的CRC校验值
+	Master_CheckCrc = CRC16(RS485Uart_RX.RX_Buf, MASTER_DATA_LEN_NUM-2);
+	if(Master_CrcVal != Master_CheckCrc)
+		return;
+
+	if(RS485Uart_RX.RX_Buf[MASTER_SENSOR_ID_NUM] == Sensor_ID)
+	{
+		Tick_RS485Ack = HAL_GetTick();
+
+		if(Tick_RS485Ack - Tick_GetSensorData > SensorTimeout)
+		{
+
+		}
+		else
+		{
+			Mater_SensorData_Ack(Sensor_ID, Sensor_Type);
+			HAL_GPIO_TogglePin(LED2_MSGTX_GPIO_Port, LED2_MSGTX_Pin);      //发送1包数据后LED2反转一次
+		}
+	}
 
 }
 
+void Mater_SensorData_Ack(uint8_t DEV_ADDR, uint8_t DEV_TYPE)
+{
+	if(RS485Uart_RX.RX_Buf[MASTER_FUNCTION_NUM] == 0x51)
+	{
+		Master51AckBuf[MASTER_51ACK_HEAD_NUM1] = 0xEE;
+		Master51AckBuf[MASTER_51ACK_HEAD_NUM2] = 0xFF;
+		Master51AckBuf[MASTER_51ACK_LEN_NUM]   = 0x08;
+		Master51AckBuf[MASTER_51ACK_ID_NUM]    = DEV_ADDR;
+		Master51AckBuf[MASTER_51ACK_FUNC_NUM]  = 0X51;
+		Master51AckBuf[MASTER_51ACK_TYPE_NUM]  = DEV_TYPE;
+
+		Master51AckBuf[MASTER_51ACK_CRCVAL_HIGH_NUM] = (uint8_t)(CRC16(MasterAckBuf,6)>> 8);
+		Master51AckBuf[MASTER_51ACK_CRCVAL_LOW_NUM]  = (uint8_t)CRC16(MasterAckBuf,6);
+
+		RS485Uart_RX_TX_Switch(TRANSMIT);   //485发送打开
+		HAL_UART_Transmit(&huart4, (uint8_t *)Master51AckBuf, sizeof(Master51AckBuf), 1000);
+		RS485Uart_RX_TX_Switch(RECEIVE);    //485接收打开，发送截止
+	}
+
+
+	if(RS485Uart_RX.RX_Buf[MASTER_FUNCTION_NUM] == 0x52)
+	{
+		Master52AckBuf[MASTER_52ACK_HEAD_NUM1] = 0xFF;
+		Master52AckBuf[MASTER_52ACK_HEAD_NUM2] = 0xEE;
+
+		Master52AckBuf[MASTER_52ACK_ID_NUM]    = DEV_ADDR;
+		Master52AckBuf[MASTER_52ACK_FUNC_NUM]  = 0X52;
+
+		switch(DEV_TYPE)
+		{
+			case Temperature_Humidity_Type:
+				Master52AckBuf[2]  = 0x0F;
+				Master52AckBuf[5]  = 0xA0;
+				Master52AckBuf[6]  = 0x02;
+				Master52AckBuf[7]  = (uint8_t)(Sensor_Data.Temperature >> 8);
+				Master52AckBuf[8]  = (uint8_t)Sensor_Data.Temperature;
+				Master52AckBuf[9]  = 0xA1;
+				Master52AckBuf[10] = 0x02;
+				Master52AckBuf[11] = (uint8_t)(Sensor_Data.Humidity >> 8);
+				Master52AckBuf[12] = (uint8_t)Sensor_Data.Humidity;
+
+				crc_Value = CRC_Return(Master52AckBuf, 13);
+				Master52AckBuf[13] = (u8)(crc_Value&0xff);
+				Master52AckBuf[14] = (u8)((crc_Value >> 8)&0xff);
+			case Outside_Temperature_Humidity_Type:
+
+
+		}
+
+	}
+
+}
+*/
+
+
+
+
+
+
+
+
+
+
+/****************************************************养殖卫士环控Modbus传输协议**************************************************************/
 void ModbusData_Analysis(void)
 {
 
@@ -60,19 +156,19 @@ void ModbusData_Analysis(void)
 	{
 		Tick_RS485Ack = HAL_GetTick();
 
-		if(Tick_RS485Ack - Tick_GetSensorData > SersorTimeout)
+		if(Tick_RS485Ack - Tick_GetSensorData > SensorTimeout)
 		{
-
+			ModBus_SensorOutline_Ack(Sensor_ID);
 		}
 		else
 		{
-			ModBus_SersorData_Ack(Sensor_ID);
+			ModBus_SensorData_Ack(Sensor_ID);
 			HAL_GPIO_TogglePin(LED2_MSGTX_GPIO_Port, LED2_MSGTX_Pin);      //发送1包数据后LED2反转一次
 		}
 	}
 }
 
-void ModBus_SersorData_Ack(uint8_t DEV_ADDR)
+void ModBus_SensorData_Ack(uint8_t DEV_ADDR)
 {
 	ModbusAckBuf[SLAVE_DEV_ADDR_NUM2] = DEV_ADDR;
     ModbusAckBuf[FUNC_NUM2]           = FUNC_VALUE_READ;
@@ -107,7 +203,37 @@ void ModBus_SersorData_Ack(uint8_t DEV_ADDR)
 	HAL_UART_Transmit(&huart4, (uint8_t *)ModbusAckBuf, sizeof(ModbusAckBuf), 1000);
 	RS485Uart_RX_TX_Switch(RECEIVE);    //485接收打开，发送截止
 
+	memset(ModbusAckBuf, 0 , sizeof(ModbusAckBuf));
+
 }
+
+void ModBus_SensorOutline_Ack(uint8_t DEV_ADDR)
+{
+	ModbusAckBuf[SLAVE_DEV_ADDR_NUM2] = DEV_ADDR;
+    ModbusAckBuf[FUNC_NUM2]           = FUNC_VALUE_READ;
+    ModbusAckBuf[BYTES_NUM]           = 4;
+
+
+	ModbusAckBuf[REG1_VAL_HIGH_NUM] = (uint8_t)(10000 >> 8);
+	ModbusAckBuf[REG1_VAL_LOW_NUM]  = (uint8_t)10000;
+	ModbusAckBuf[REG2_VAL_HIGH_NUM] = (uint8_t)(10000 >> 8);
+	ModbusAckBuf[REG2_VAL_LOW_NUM]  = (uint8_t)10000;
+
+
+	ModbusAckBuf[CRC_VAL_HIGH_NUM2] = (uint8_t)(CRC16(ModbusAckBuf,7)>> 8);
+	ModbusAckBuf[CRC_VAL_LOW_NUM2]  = (uint8_t)CRC16(ModbusAckBuf,7);
+
+
+	RS485Uart_RX_TX_Switch(TRANSMIT);   //485发送打开
+	HAL_UART_Transmit(&huart4, (uint8_t *)ModbusAckBuf, sizeof(ModbusAckBuf), 1000);
+	RS485Uart_RX_TX_Switch(RECEIVE);    //485接收打开，发送截止
+
+	memset(ModbusAckBuf, 0 , sizeof(ModbusAckBuf));
+
+}
+
+/*******************************************************************************************************************************************/
+
 
 void RS485Uart_RX_TX_Switch(RS485_STATE RS485state)
 {

@@ -32,8 +32,6 @@ typedef enum
 	CanSensor_TYPE_WINDOW_POSITION,
 	CanSensor_TYPE_TEMPERATURE,
 	CanSensor_TYPE_HUMIDITY,
-	CanSensor_TYPE_OUT_TEMPERATURE,
-	CanSensor_TYPE_OUT_HUMIDITY,
 	CanSensor_TYPE_GAS_NH3,
 	CanSensor_TYPE_LUX ,
 	CanSensor_TYPE_GAS_CO2,
@@ -43,23 +41,27 @@ typedef enum
 	CanSensor_TYPE_WIND_DIRECTION,
 	CanSensor_TYPE_WIND_SPEED,
 	CanSensor_TYPE_WATER_TEMPERATURE,
+
+	CanSensor_TYPE_TEMPERATURE_HUMIDITY,
+
 }CanSensor_t;
 
 typedef struct
 {
-	uint8_t      Null           :5;
-	CanBoard_t   CanBoardType   :1;
-	CanSensor_t  CanSensorType  :5;
-	uint8_t      CanSensorNum   :5;
+
+	CanBoard_t   CanBoardType;
+	CanSensor_t  CanSensorType;
+	uint8_t      CanSensorNum;
+
 }CanIdConstruction_t;
 
 typedef union
 {
-	uint32_t             OriginId;
+	uint16_t             OriginId;
 	CanIdConstruction_t  Resolve;
 }StdIdResolve_t;
 
-
+extern BOOL CanDataSendTimerFlag;
 void CanAnalysis(void);
 
 #endif /* CANANALYSIS_H_ */

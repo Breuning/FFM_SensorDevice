@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=G:/SNAI/3.MyProgram/IBS_EndDevice_truestudio/Inc
+HeaderPath=G:/SNAI/MyProject/FFM_SensorDevice/Inc
 HeaderFiles=gpio.h;adc.h;dma.h;i2c.h;usart.h;stm32f1xx_it.h;stm32f1xx_hal_conf.h;main.h;tim.h;can.h;iwdg.h;
-SourcePath=G:/SNAI/3.MyProgram/IBS_EndDevice_truestudio/Src
+SourcePath=G:/SNAI/MyProject/FFM_SensorDevice/Src
 SourceFiles=gpio.c;adc.c;dma.c;i2c.c;usart.c;stm32f1xx_it.c;stm32f1xx_hal_msp.c;main.c;tim.c;can.c;iwdg.c;
 
 [PreviousLibFiles]

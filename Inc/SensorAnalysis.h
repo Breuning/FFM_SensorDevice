@@ -61,11 +61,11 @@ typedef enum
 void Get_SensorData();
 void SensorAnalysis();
 
-
+float GetFloatSensorData(FloatSensorDataType type);
 
 extern BOOL SensorReadTimerFlag;
 extern Sensor_Data_Struct Sensor_Data;
 extern uint32_t Tick_GetSensorData;
-extern float SensorData_Float[];
+
 
 #endif /* SENSORANALYSIS_H_ */

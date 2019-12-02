@@ -23,19 +23,6 @@ uint32_t Tick_GetSensorData = 0;                  //用于判断探头获取的数据是否很
 
 char SensorData_Buff[30];
 
-float SensorData_Float[] =
-{
-	((float)Sensor_Data.Temperature)/10.0,
-	((float)Sensor_Data.Humidity)/10.0,
-	(float)Sensor_Data.WaterTemperature,
-	(float)Sensor_Data.NegativePressure,
-	(float)Sensor_Data.CO2_Data,
-	(float)Sensor_Data.NH3_Data,
-	(float)Sensor_Data.Illumination,
-	(float)Sensor_Data.WindDerection,
-	(float)Sensor_Data.WaterMeter
-
-}
 
 
 void SensorAnalysis(void)
@@ -106,6 +93,23 @@ void Get_SensorData(void)
 }
 
 
+float GetFloatSensorData(FloatSensorDataType type)
+{
+	float SensorData_Float[30];
+
+	SensorData_Float[Temperature]      = ((float)Sensor_Data.Temperature)/10.0;
+	SensorData_Float[Humidity]   	   = ((float)Sensor_Data.Humidity)/10.0;
+	SensorData_Float[WaterTemperature] = (float)Sensor_Data.WaterTemperature;
+	SensorData_Float[NegativePressure] = (float)Sensor_Data.NegativePressure;
+	SensorData_Float[CO2_Data] 		   = (float)Sensor_Data.CO2_Data;
+	SensorData_Float[NH3_Data]         = (float)Sensor_Data.NH3_Data;
+	SensorData_Float[Illumination]     = (float)Sensor_Data.Illumination;
+	SensorData_Float[WindDerection]    = (float)Sensor_Data.WindDerection;
+	SensorData_Float[WaterMeter]       = (float)Sensor_Data.WaterMeter;
+
+
+	return SensorData_Float[type];
+}
 
 
 

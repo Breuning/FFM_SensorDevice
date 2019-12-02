@@ -1,0 +1,7 @@
+adc.c:31:6:MX_ADC1_Init	24	static
+adc.c:60:6:HAL_ADC_MspInit	40	static
+adc.c:103:6:HAL_ADC_MspDeInit	16	static
+adc.c:132:10:ADC_ReadData	8	static
+adc.c:147:10:ADC_Average	32	static
+adc.c:161:10:Get_Pressure	32	static
+adc.c:186:10:Get_WindowPos	24	static
