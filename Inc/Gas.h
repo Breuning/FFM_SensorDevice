@@ -17,8 +17,8 @@
 
 void ZE03NH3_Init(void);
 void MHZ14CO2_Init(void);
-void GetValidDateFromZE03NH3(void);
-void GetValidDateFromMHZ14CO2(void);
+void GetValidDataFromZE03NH3(void);
+void GetValidDataFromMHZ14CO2(void);
 uint8_t GasReceiveDataCheckSum(uint8_t *array);
 
 extern uint8_t GasUsart_Receive[20];

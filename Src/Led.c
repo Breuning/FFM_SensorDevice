@@ -23,7 +23,7 @@ void LED1_RUNNING_Blink(void)
 void LED2_MSGTX_Blink(void)
 {
 	HAL_GPIO_TogglePin(LED2_MSGTX_GPIO_Port, LED2_MSGTX_Pin);
-	HAL_Delay(60);
+	HAL_Delay(100);
 	HAL_GPIO_TogglePin(LED2_MSGTX_GPIO_Port, LED2_MSGTX_Pin);
 }
 

@@ -107,7 +107,7 @@ typedef enum
 void RS485Analysis(void);
 
 void MasterData_Analysis(void);
-void Mater_SensorData_Ack(uint8_t DEV_ADDR, uint8_t DEV_TYPE);
+void Master_SensorData_Ack(uint8_t DEV_ADDR, uint8_t DEV_TYPE);
 
 void ModbusData_Analysis(void);
 void ModBus_SensorData_Ack(uint8_t DEV_ADDR);

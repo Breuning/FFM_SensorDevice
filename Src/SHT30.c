@@ -23,16 +23,16 @@ void SHT30_Init(void)
 	HAL_I2C_Master_Transmit(&hi2c1, SHT30Addr_Write, SHT30_Modecommand_Buffer, 2, 1000);      //SHT30传感器周期性的进行温湿度转换
 }
 
-void GetValidDateFromSHT30(void)
+void GetValidDataFromSHT30(void)
 {
 
 	HAL_I2C_Master_Transmit(&hi2c1, SHT30Addr_Write, SHT30_Fetchcommand_Buffer, 2, 1000);     //发送获取传感器数据的命令
 	HAL_I2C_Master_Receive (&hi2c1, SHT30Addr_Read, SHT30_Data_Buffer, 6, 1000);			  //接收传感器返回的数据值放到SHT30_Data_Buffer
 
 	if(strlen(SHT30_Data_Buffer) != 0)
-	{
 		Tick_GetSensorData = HAL_GetTick();
-	}
+	else
+		return;
 
 	SHT30_Calc(SHT30_Data_Buffer, &Sensor_Data.Temperature_Flag, &Sensor_Data.Temperature_u, &Sensor_Data.Humidity);
 
@@ -86,11 +86,13 @@ void TemperatureData_NegativeValueJudge(void)
 {
 	if(Sensor_Data.Temperature_Flag)
 	{
-		Sensor_Data.Temperature = (int16_t)Sensor_Data.Temperature_u;
+		Sensor_Data.Temperature   = (int16_t)Sensor_Data.Temperature_u;
+		Sensor_Data.Temperature_m = (uint16_t)Sensor_Data.Temperature_u;
 	}
 	else
 	{
-		Sensor_Data.Temperature = (int16_t)(Sensor_Data.Temperature_u*(-1));
+		Sensor_Data.Temperature   = (int16_t)(Sensor_Data.Temperature_u*(-1));
+		Sensor_Data.Temperature_m = (uint16_t)(Sensor_Data.Temperature_u | 0x8000);
 	}
 }
 

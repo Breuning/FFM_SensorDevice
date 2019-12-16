@@ -247,13 +247,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)     //定时器中断回调
 //    	htim->Instance->CNT = 0;                               		  //每次中断回调函数执行后进行计数器清零
     }
 
-	if(Time_cnt >= 12)
-	{ //1Min
+//	定时重启
+//	if(Time_cnt >= 12)
+//	{ //1Min
+//
+//		__disable_fault_irq();
+//		NVIC_SystemReset();
+//		Time_cnt = 0;
+//	}
 
-		__disable_fault_irq();
-		NVIC_SystemReset();
-		Time_cnt = 0;
-	}
+
 }
 /* USER CODE END 1 */
 

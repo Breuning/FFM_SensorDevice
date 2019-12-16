@@ -41,7 +41,7 @@ void Get_SensorType(void)
 		Temperature_Humidity_Type,			// 4  室内温湿度
 		Outside_Temperature_Humidity_Type,	// 5  室外温湿度
 		Water_Temperature_Type,				// 6  水温
-		Pressure_Type,						// 7  负压
+		Negative_Pressure_Type,				// 7  负压
 		Gas_CO2_Type,						// 8  二氧化碳
 		Gas_NH3_Type,						// 9  氨气
 		Illumination_Type,					//10  光照
@@ -49,7 +49,18 @@ void Get_SensorType(void)
 		WindowPosition_Type,				//12  小窗推杆位移
 		0,
 		0,
-		0
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		Temperature_Humidity_Type,			//21  室内温湿度
+		Temperature_Humidity_Type,			//22  室内温湿度
+		Temperature_Humidity_Type,			//23  室内温湿度
+		Temperature_Humidity_Type,			//24  室内温湿度
+		Temperature_Humidity_Type,			//25  室内温湿度
+		Temperature_Humidity_Type,			//26  室内温湿度
 	};
 
 	Sensor_Type = Type[Sensor_ID];

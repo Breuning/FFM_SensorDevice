@@ -113,7 +113,8 @@ int main(void)
   MX_TIM2_Init();
   MX_USART2_UART_Init();
   MX_CAN_Init();
-  MX_IWDG_Init();
+//  MX_IWDG_Init();
+  MX_ADC3_Init();
   MX_TIM3_Init();
 
   /* Initialize interrupts */
@@ -121,7 +122,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 
-  HAL_IWDG_Init(&hiwdg);                //初始化并开启iwdg
+//  HAL_IWDG_Init(&hiwdg);                //初始化并开启iwdg
   HAL_TIM_Base_Start_IT(&htim3);        //使能定时器3中断，1s进入一次，
   HAL_TIM_Base_Start_IT(&htim5);        //使能定时器5中断，5s进入一次，控制读取传感器数值频率
 
@@ -147,7 +148,7 @@ int main(void)
 //	LoraAnalysis();
 //	CanAnalysis();
 
-	HAL_IWDG_Refresh(&hiwdg);     //喂狗，即重新加载计数值
+//	HAL_IWDG_Refresh(&hiwdg);     //喂狗，即重新加载计数值
   }
   /* USER CODE END 3 */
 }

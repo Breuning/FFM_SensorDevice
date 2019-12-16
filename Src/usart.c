@@ -478,6 +478,7 @@ void UARTReceive_IDLECallback(UART_HandleTypeDef *huart, UART_RECEIVETYPE *Uart_
 
 			Uart_RX->receive_flag = 1;                                 //置位串口接收标志位
 
+
 			if(huart->Instance == USART1 || huart->Instance == USART2 || huart->Instance == USART3)  //串口4等
 			{
 				HAL_UART_Receive_DMA(huart, Uart_RX->RX_Buf, Size);

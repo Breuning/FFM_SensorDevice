@@ -28,7 +28,7 @@
 #define  Gas_CO_Type 						0xA4
 #define  Illumination_Type 					0xA5
 #define  Water_meter_Type 					0xA6
-#define  Pressure_Type 						0xA7
+#define  Negative_Pressure_Type 			0xA7
 #define  Wind_Direction_Type 				0xA8
 #define  Wind_Speed_Type 					0xA9
 #define  Outside_Temperature_Type 			0xAA

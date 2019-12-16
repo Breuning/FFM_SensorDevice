@@ -31,16 +31,23 @@
 /* USER CODE END Includes */
 
 extern ADC_HandleTypeDef hadc1;
+extern ADC_HandleTypeDef hadc3;
 
 /* USER CODE BEGIN Private defines */
-
+#define NTC_PUSH_UP_RESISTOR_KR (float)10.0
 /* USER CODE END Private defines */
 
 void MX_ADC1_Init(void);
+void MX_ADC3_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-uint16_t Get_Pressure(void);
-uint16_t Get_WindowPos(void);
+uint16_t ADC_Average(ADC_HandleTypeDef* hadc, uint8_t times);
+
+void GetValidDataFromPressure(void);
+void GetValidDataFromWindowPos(void);
+
+void Get_WindowPos_NewPushrod(void);
+void GetWaterTemFromNTC(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

@@ -98,7 +98,7 @@ void SHT30_Get_TH(uint8_t *vTemSymbol, uint16_t *vTem, uint16_t *vHum);						//»
 
 
 void SHT30_Init(void);
-void GetValidDateFromSHT30(void);
+void GetValidDataFromSHT30(void);
 void SHT30_Calc(uint8_t *vBuf, uint8_t *vTemSymbol, uint16_t *vTem, uint16_t *vHum);		//¼ÆËã²É¼¯Êý¾Ý
 void TemperatureData_NegativeValueJudge(void);
 uint8_t SHT30_CheckCrc8(uint8_t *vDat, uint8_t vLen);										//CRC8 Ð£Ñé

@@ -26,7 +26,7 @@ void BH1750_Init(void)
 	HAL_Delay(180); //至少延时120ms
 }
 
-void GetValidDateFromBH1750(void)
+void GetValidDataFromBH1750(void)
 {
 
 	HAL_I2C_Master_Receive(&hi2c1, BH1750Addr_Read, BH1750_Data_Buffer, 2, 0xff);    		//接收传感器返回的数据值放到BH1750_Data_Buffer

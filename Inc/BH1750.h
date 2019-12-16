@@ -24,7 +24,7 @@
 #define	  BH1750_ONE_L 		0x23 		 // 一次低分辨率模式，4lx，16ms
 
 void BH1750_Init(void);
-void GetValidDateFromBH1750(void);
+void GetValidDataFromBH1750(void);
 
 
 

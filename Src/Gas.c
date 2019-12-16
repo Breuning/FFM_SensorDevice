@@ -30,7 +30,7 @@ void ZE03NH3_Init(void)
 }
 
 
-void GetValidDateFromMHZ14CO2(void)
+void GetValidDataFromMHZ14CO2(void)
 {
 
 	HAL_UART_Transmit(&huart3, Gas_ReadValueCommand, TransmitDataLen_Gas, 0xff);       //发送读取气体浓度值命令
@@ -48,7 +48,7 @@ void GetValidDateFromMHZ14CO2(void)
 
 }
 
-void GetValidDateFromZE03NH3(void)
+void GetValidDataFromZE03NH3(void)
 {
 
 //	HAL_UART_Transmit(&huart3, Gas_ReadValueCommand, TransmitDataLen_Gas, 0xff);      //NH3模组为1s一次的主动上传模式，无需发送读取命令

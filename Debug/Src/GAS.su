@@ -1,5 +1,5 @@
 Gas.c:19:6:MHZ14CO2_Init	4	static
 Gas.c:25:6:ZE03NH3_Init	8	static
-Gas.c:33:6:GetValidDateFromMHZ14CO2	8	static
-Gas.c:51:6:GetValidDateFromZE03NH3	8	static
+Gas.c:33:6:GetValidDataFromMHZ14CO2	8	static
+Gas.c:51:6:GetValidDataFromZE03NH3	8	static
 Gas.c:69:9:GasReceiveDataCheckSum	24	static

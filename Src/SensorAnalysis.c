@@ -36,10 +36,13 @@ void SensorAnalysis(void)
 
 		memset(SensorData_Buff, 0 , sizeof(SensorData_Buff));
 
-//		sprintf(SensorData_Buff, "Tem:%d Hum:%d \n", Sensor_Data.Temperature, Sensor_Data.Humidity );
-//		sprintf(SensorData_Buff, "Illu: %d \n", Sensor_Data.Illumination);
-		sprintf(SensorData_Buff, "NH3: %d \n", Sensor_Data.NH3_Data);
+//		sprintf(SensorData_Buff, "Tem:%d Hum:%d \r", Sensor_Data.Temperature, Sensor_Data.Humidity );
+//		sprintf(SensorData_Buff, "Illu: %d \r", Sensor_Data.Illumination);
+//		sprintf(SensorData_Buff, "NH3: %d \r", Sensor_Data.NH3_Data);
 //		sprintf(SensorData_Buff, "CO2: %d \r", Sensor_Data.CO2_Data);
+//		sprintf(SensorData_Buff, "Pressure: %d \r", Sensor_Data.NegativePressure);
+//		sprintf(SensorData_Buff, "Windowpos: %d \r", Sensor_Data.WindowPosition);
+		sprintf(SensorData_Buff, "WaterTem: %d \r", Sensor_Data.WindowPosition);
 
 		//将数组内的数据通过USART2发送至PC
 		HAL_UART_Transmit(&huart2, (uint8_t *)SensorData_Buff, strlen(SensorData_Buff), 100);
@@ -58,33 +61,36 @@ void Get_SensorData(void)
 		case Temperature_Humidity_Type:
 
 		case Outside_Temperature_Humidity_Type:
-			GetValidDateFromSHT30();
+			GetValidDataFromSHT30();
 			FiltetAlgorithmforSensors(Sensor_Data.Temperature_u, &filter[0]);
 			TemperatureData_NegativeValueJudge();
-			FiltetAlgorithmforSensors(Sensor_Data.Humidity,    &filter[1]);
+
+			FiltetAlgorithmforSensors(Sensor_Data.Humidity, &filter[1]);
 			break;
-//		case Water_Temperature_Type:
+		case Water_Temperature_Type:
+			GetWaterTemFromNTC();
 //			Sensor_Data.Water_Temperature = DS18B20_Get_Temp();
-//			FiltetAlgorithmforSensors(Sensor_Data.Water_Temperature, &filter[2]);
+			FiltetAlgorithmforSensors(Sensor_Data.WaterTemperature, &filter[2]);
 			break;
-		case Pressure_Type:
-			Sensor_Data.NegativePressure = Get_Pressure();           //负压暂且不做滤波
+		case Negative_Pressure_Type:
+			GetValidDataFromPressure();
 			FiltetAlgorithmforSensors(Sensor_Data.NegativePressure, &filter[3]);
 			break;
 		case Gas_CO2_Type:
-			GetValidDateFromMHZ14CO2();
+			GetValidDataFromMHZ14CO2();
 			FiltetAlgorithmforSensors(Sensor_Data.CO2_Data, &filter[4]);
 			break;
 		case Gas_NH3_Type:
-			GetValidDateFromZE03NH3();
+			GetValidDataFromZE03NH3();
 			FiltetAlgorithmforSensors(Sensor_Data.NH3_Data, &filter[5]);
 			break;
 		case Illumination_Type:
-			GetValidDateFromBH1750();
+			GetValidDataFromBH1750();
 			FiltetAlgorithmforSensors(Sensor_Data.Illumination, &filter[6]);
 			break;
 		case WindowPosition_Type:
-			Sensor_Data.WindowPosition = Get_WindowPos();
+			GetValidDataFromWindowPos();
+//			Get_WindowPos_NewPushrod();             //新小窗推杆位移
 			FiltetAlgorithmforSensors(Sensor_Data.WindowPosition, &filter[7]);
 			break;
 		default:

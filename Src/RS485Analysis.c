@@ -14,8 +14,8 @@
 
 uint32_t Tick_RS485Ack;
 
-uint8_t Master51AckBuf[8] = {0};
-uint8_t Master52AckBuf[8] = {0};
+uint8_t Master51AckBuf[8]  = {0};
+uint8_t Master52AckBuf[15] = {0};
 
 uint8_t ModbusAckBuf[9] = {0};
 
@@ -26,7 +26,7 @@ void RS485Analysis(void)
 
 		if((RS485Uart_RX.RX_Buf[0] == 0xFF) && (RS485Uart_RX.RX_Buf[1] == 0xEE))             //环控自定义传输协议
 		{
-//			MasterData_Analysis();
+			MasterData_Analysis();
 		}
 
 		if((RS485Uart_RX.RX_Buf[0] != 0xFF) && (RS485Uart_RX.RX_Buf[1] == 0x03))             //Modbus标准传输协议，PLC传输过来
@@ -34,14 +34,16 @@ void RS485Analysis(void)
 			ModbusData_Analysis();
 		}
 
-		HAL_UART_Receive_DMA(&huart4, RS485Uart_RX.RX_Buf, RECEIVELEN);
 		RS485Uart_RX.receive_flag = 0;
+		memset(RS485Uart_RX.RX_Buf, 0 , sizeof(RS485Uart_RX.RX_Buf));
+
+		HAL_UART_Receive_DMA(&huart4, RS485Uart_RX.RX_Buf, RECEIVELEN);
 	}
 }
 
 
 /****************************************************养殖大师环控自定义传输协议**************************************************************/
-/*
+
 void MasterData_Analysis(void)
 {
 	uint16_t Master_CrcVal;
@@ -51,7 +53,7 @@ void MasterData_Analysis(void)
 		return;
 
 	Master_CrcVal   = (RS485Uart_RX.RX_Buf[MASTER_CRCVAL_HIGH_NUM]<<8) | RS485Uart_RX.RX_Buf[MASTER_CRCVAL_LOW_NUM];  //数据包中的CRC校验值
-	Master_CheckCrc = CRC16(RS485Uart_RX.RX_Buf, MASTER_DATA_LEN_NUM-2);
+	Master_CheckCrc = CRC16(RS485Uart_RX.RX_Buf, RS485Uart_RX.RX_Buf[MASTER_DATA_LEN_NUM]-2);
 	if(Master_CrcVal != Master_CheckCrc)
 		return;
 
@@ -61,34 +63,39 @@ void MasterData_Analysis(void)
 
 		if(Tick_RS485Ack - Tick_GetSensorData > SensorTimeout)
 		{
-
+			LED2_MSGTX_Blink();
+			HAL_Delay(100);
+			LED2_MSGTX_Blink();					//长时间未读到探头数据时信号灯快速闪烁2次
+			return;
 		}
 		else
 		{
-			Mater_SensorData_Ack(Sensor_ID, Sensor_Type);
+			Master_SensorData_Ack(Sensor_ID, Sensor_Type);
 			HAL_GPIO_TogglePin(LED2_MSGTX_GPIO_Port, LED2_MSGTX_Pin);      //发送1包数据后LED2反转一次
 		}
 	}
 
 }
 
-void Mater_SensorData_Ack(uint8_t DEV_ADDR, uint8_t DEV_TYPE)
+void Master_SensorData_Ack(uint8_t DEV_ADDR, uint8_t DEV_TYPE)
 {
 	if(RS485Uart_RX.RX_Buf[MASTER_FUNCTION_NUM] == 0x51)
 	{
-		Master51AckBuf[MASTER_51ACK_HEAD_NUM1] = 0xEE;
-		Master51AckBuf[MASTER_51ACK_HEAD_NUM2] = 0xFF;
+		Master51AckBuf[MASTER_51ACK_HEAD_NUM1] = 0xFF;
+		Master51AckBuf[MASTER_51ACK_HEAD_NUM2] = 0xEE;
 		Master51AckBuf[MASTER_51ACK_LEN_NUM]   = 0x08;
 		Master51AckBuf[MASTER_51ACK_ID_NUM]    = DEV_ADDR;
 		Master51AckBuf[MASTER_51ACK_FUNC_NUM]  = 0X51;
 		Master51AckBuf[MASTER_51ACK_TYPE_NUM]  = DEV_TYPE;
 
-		Master51AckBuf[MASTER_51ACK_CRCVAL_HIGH_NUM] = (uint8_t)(CRC16(MasterAckBuf,6)>> 8);
-		Master51AckBuf[MASTER_51ACK_CRCVAL_LOW_NUM]  = (uint8_t)CRC16(MasterAckBuf,6);
+		Master51AckBuf[MASTER_51ACK_CRCVAL_HIGH_NUM] = (uint8_t)(CRC16(Master51AckBuf,6)>> 8);
+		Master51AckBuf[MASTER_51ACK_CRCVAL_LOW_NUM]  = (uint8_t)CRC16(Master51AckBuf,6);
 
 		RS485Uart_RX_TX_Switch(TRANSMIT);   //485发送打开
 		HAL_UART_Transmit(&huart4, (uint8_t *)Master51AckBuf, sizeof(Master51AckBuf), 1000);
 		RS485Uart_RX_TX_Switch(RECEIVE);    //485接收打开，发送截止
+
+		memset(Master51AckBuf, 0 , sizeof(Master51AckBuf));
 	}
 
 
@@ -104,35 +111,111 @@ void Mater_SensorData_Ack(uint8_t DEV_ADDR, uint8_t DEV_TYPE)
 		{
 			case Temperature_Humidity_Type:
 				Master52AckBuf[2]  = 0x0F;
-				Master52AckBuf[5]  = 0xA0;
+				Master52AckBuf[5]  = Temperature_Type;
 				Master52AckBuf[6]  = 0x02;
-				Master52AckBuf[7]  = (uint8_t)(Sensor_Data.Temperature >> 8);
-				Master52AckBuf[8]  = (uint8_t)Sensor_Data.Temperature;
-				Master52AckBuf[9]  = 0xA1;
+				Master52AckBuf[7]  = (uint8_t)(Sensor_Data.Temperature_m >> 8);
+				Master52AckBuf[8]  = (uint8_t)Sensor_Data.Temperature_m;
+				Master52AckBuf[9]  = Humidity_Type;
 				Master52AckBuf[10] = 0x02;
 				Master52AckBuf[11] = (uint8_t)(Sensor_Data.Humidity >> 8);
 				Master52AckBuf[12] = (uint8_t)Sensor_Data.Humidity;
 
-				crc_Value = CRC_Return(Master52AckBuf, 13);
-				Master52AckBuf[13] = (u8)(crc_Value&0xff);
-				Master52AckBuf[14] = (u8)((crc_Value >> 8)&0xff);
+				Master52AckBuf[13] = (uint8_t)(CRC16(Master52AckBuf, 13)>> 8);
+				Master52AckBuf[14] = (uint8_t)CRC16(Master52AckBuf, 13);
+
+				break;
 			case Outside_Temperature_Humidity_Type:
+				Master52AckBuf[2]  = 0x0F;
+				Master52AckBuf[5]  = Outside_Temperature_Type;
+				Master52AckBuf[6]  = 0x02;
+				Master52AckBuf[7]  = (uint8_t)(Sensor_Data.Temperature_m >> 8);
+				Master52AckBuf[8]  = (uint8_t)Sensor_Data.Temperature_m;
+				Master52AckBuf[9]  = Outside_Humidity_Type;
+				Master52AckBuf[10] = 0x02;
+				Master52AckBuf[11] = (uint8_t)(Sensor_Data.Humidity >> 8);
+				Master52AckBuf[12] = (uint8_t)Sensor_Data.Humidity;
 
+				Master52AckBuf[13] = (uint8_t)(CRC16(Master52AckBuf, 13)>> 8);
+				Master52AckBuf[14] = (uint8_t)CRC16(Master52AckBuf, 13);
 
+				break;
+			case Water_Temperature_Type:
+				Master52AckBuf[2]  = 0x0B;
+				Master52AckBuf[5]  = Water_Temperature_Type;
+				Master52AckBuf[6]  = 0x02;
+				Master52AckBuf[7]  = (uint8_t)(Sensor_Data.WaterTemperature >> 8);
+				Master52AckBuf[8]  = (uint8_t)Sensor_Data.WaterTemperature;
+
+				Master52AckBuf[9]  = (uint8_t)(CRC16(Master52AckBuf, 9)>> 8);
+				Master52AckBuf[10] = (uint8_t)CRC16(Master52AckBuf, 9);
+
+				break;
+			case Negative_Pressure_Type:
+				Master52AckBuf[2]  = 0x0B;
+				Master52AckBuf[5]  = Negative_Pressure_Type;
+				Master52AckBuf[6]  = 0x02;
+				Master52AckBuf[7]  = (uint8_t)(Sensor_Data.NegativePressure >> 8);
+				Master52AckBuf[8]  = (uint8_t)Sensor_Data.NegativePressure;
+
+				Master52AckBuf[9]  = (uint8_t)(CRC16(Master52AckBuf, 9)>> 8);
+				Master52AckBuf[10] = (uint8_t)CRC16(Master52AckBuf, 9);
+
+				break;
+			case Gas_CO2_Type:
+				Master52AckBuf[2]  = 0x0B;
+				Master52AckBuf[5]  = Gas_CO2_Type;
+				Master52AckBuf[6]  = 0x02;
+				Master52AckBuf[7]  = (uint8_t)(Sensor_Data.CO2_Data >> 8);
+				Master52AckBuf[8]  = (uint8_t)Sensor_Data.CO2_Data;
+
+				Master52AckBuf[9]  = (uint8_t)(CRC16(Master52AckBuf, 9)>> 8);
+				Master52AckBuf[10] = (uint8_t)CRC16(Master52AckBuf, 9);
+
+				break;
+			case Gas_NH3_Type:
+				Master52AckBuf[2]  = 0x0B;
+				Master52AckBuf[5]  = Gas_NH3_Type;
+				Master52AckBuf[6]  = 0x02;
+				Master52AckBuf[7]  = (uint8_t)(Sensor_Data.NH3_Data >> 8);
+				Master52AckBuf[8]  = (uint8_t)Sensor_Data.NH3_Data;
+
+				Master52AckBuf[9]  = (uint8_t)(CRC16(Master52AckBuf, 9)>> 8);
+				Master52AckBuf[10] = (uint8_t)CRC16(Master52AckBuf, 9);
+
+				break;
+			case Illumination_Type:
+				Master52AckBuf[2]  = 0x0B;
+				Master52AckBuf[5]  = Illumination_Type;
+				Master52AckBuf[6]  = 0x02;
+				Master52AckBuf[7]  = (uint8_t)(Sensor_Data.Illumination >> 8);
+				Master52AckBuf[8]  = (uint8_t)Sensor_Data.Illumination;
+
+				Master52AckBuf[9]  = (uint8_t)(CRC16(Master52AckBuf, 9)>> 8);
+				Master52AckBuf[10] = (uint8_t)CRC16(Master52AckBuf, 9);
+
+				break;
+			case WindowPosition_Type:
+				Master52AckBuf[2]  = 0x0B;
+				Master52AckBuf[5]  = WindowPosition_Type;
+				Master52AckBuf[6]  = 0x02;
+				Master52AckBuf[7]  = (uint8_t)(Sensor_Data.WindowPosition >> 8);
+				Master52AckBuf[8]  = (uint8_t)Sensor_Data.WindowPosition;
+
+				Master52AckBuf[9]  = (uint8_t)(CRC16(Master52AckBuf, 9)>> 8);
+				Master52AckBuf[10] = (uint8_t)CRC16(Master52AckBuf, 9);
+
+				break;
+			default :
+				break;
 		}
 
+		RS485Uart_RX_TX_Switch(TRANSMIT);   //485发送打开
+		HAL_UART_Transmit(&huart4, (uint8_t *)Master52AckBuf, sizeof(Master52AckBuf), 1000);
+		RS485Uart_RX_TX_Switch(RECEIVE);    //485接收打开，发送截止
+
+		memset(Master52AckBuf, 0 , sizeof(Master52AckBuf));
 	}
-
 }
-*/
-
-
-
-
-
-
-
-
 
 
 /****************************************************养殖卫士环控Modbus传输协议**************************************************************/
@@ -158,7 +241,11 @@ void ModbusData_Analysis(void)
 
 		if(Tick_RS485Ack - Tick_GetSensorData > SensorTimeout)
 		{
-			ModBus_SensorOutline_Ack(Sensor_ID);
+//			ModBus_SensorOutline_Ack(Sensor_ID);
+
+			LED2_MSGTX_Blink();
+			HAL_Delay(100);
+			LED2_MSGTX_Blink();			//长时间未读到探头数据时信号灯快速闪烁2次
 		}
 		else
 		{
@@ -242,7 +329,6 @@ void RS485Uart_RX_TX_Switch(RS485_STATE RS485state)
 	if(RS485state == RECEIVE)
 		HAL_GPIO_WritePin(RS485_SEL_GPIO_Port, RS485_SEL_Pin, GPIO_PIN_RESET);		//拉低RS485_SEL脚，RS485为接收状态
 }
-
 
 
 const uint8_t auchCRCHi[] =

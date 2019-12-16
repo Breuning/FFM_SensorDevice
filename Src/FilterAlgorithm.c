@@ -17,7 +17,7 @@ static uint16_t smoothaverage_lib_X(uint16_t smootnum,uint16_t *arraydata);
 //--------------------------------------------------------------------------------------------
 //	 @function:    传感器数据滤波
 //--------------------------------------------------------------------------------------------
-uint16_t FiltetAlgorithmforSensors(uint16_t SersorData, FILTER *Filter)
+void FiltetAlgorithmforSensors(uint16_t SersorData, FILTER *Filter)
 {
 	uint8_t i=0;
 

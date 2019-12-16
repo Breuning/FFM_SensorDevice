@@ -14,12 +14,13 @@
 
 typedef struct
 {
-	int16_t  Temperature;
-	uint16_t Temperature_u;
+	uint16_t Temperature_u;      //温度绝对值，无符号型，值放大10倍传输
 	uint8_t  Temperature_Flag;
+	int16_t  Temperature;
+	uint16_t Temperature_m;      //环控养殖大师传输，若为负数在最高位加1
 
-	uint16_t Humidity;
-    uint16_t WaterTemperature;
+	uint16_t Humidity;           //值放大10倍传输
+	uint16_t WaterTemperature;   //值放大10倍传输
     uint16_t NegativePressure;
 
     uint16_t CO2_Data;

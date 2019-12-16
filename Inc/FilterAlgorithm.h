@@ -19,7 +19,7 @@ typedef struct
 }FILTER;
 
 extern FILTER filter[10];
-uint16_t FiltetAlgorithmforSensors(uint16_t tem,FILTER *Filter);
+void FiltetAlgorithmforSensors(uint16_t SersorData, FILTER *Filter);
 
 
 #endif /* FILTERALGORITHM_H_ */
