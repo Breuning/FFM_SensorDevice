@@ -36,7 +36,7 @@ void FiltetAlgorithmforSensors(uint16_t SersorData, FILTER *Filter)
 		}
 		*(Filter->SampleBuff+SAMPLE_NUMBER-1) = (uint16_t)SersorData;
 	}
-	UsartAllowSend = true;
+
 
 	if(smoothaverage_lib_X(Filter->SampleCount, Filter->SampleBuff) == false)
 	{
@@ -87,5 +87,25 @@ static uint16_t smoothaverage_lib_X(uint16_t smootnum, uint16_t *arraydata)
     return (averagedata);
 }
 
+//--------------------------------------------------------------------------------------------
+//	 @function:    ÏÞ·ùÂË²¨Ëã·¨
+//--------------------------------------------------------------------------------------------
+void LimitBreadthFilter(uint16_t SensorData)
+{
 
+	#define A 20
+	static uint16_t SensorData_Last;
+	static uint32_t cnt = 0;
+	if(cnt == 0)
+	{
+		SensorData_Last = SensorData;
+	}
+	else
+	{
+		if ( ( SensorData - SensorData_Last > A ) || ( SensorData_Last - SensorData > A ))
+			SensorData = SensorData_Last;
+		SensorData_Last = SensorData;
+	}
+	cnt++;
+}
 

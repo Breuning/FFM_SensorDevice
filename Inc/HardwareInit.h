@@ -37,7 +37,7 @@
 #define  Temperature_Humidity_Type 			0xC3
 #define  Outside_Temperature_Humidity_Type 	0xC4
 #define  WindowPosition_Type 				0xAD
-
+#define  Gas_O2_Type 						0xB1
 
 
 void Hardware_Init(void);

@@ -209,7 +209,7 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 
 /* USER CODE BEGIN 1 */
 
-void Delay_us(uint16_t us)                                     //利用TIM2实现us延时
+void Delay_us(uint16_t us)                                     //利用TIM2实现us延时,经过测试十分准确
 {
 	/* 中断会打断微秒延时函数，
 	 * 但计数器计数不会停

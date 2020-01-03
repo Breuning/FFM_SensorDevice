@@ -1,5 +1,0 @@
-SHT30.c:21:6:SHT30_Init	16	static
-SHT30.c:26:6:GetValidDataFromSHT30	16	static
-SHT30.c:50:6:SHT30_Calc	40	static
-SHT30.c:85:6:TemperatureData_NegativeValueJudge	4	static
-SHT30.c:101:9:SHT30_CheckCrc8	24	static

@@ -47,7 +47,7 @@ void Get_SensorType(void)
 		Illumination_Type,					//10  光照
 		WindowPosition_Type,				//11  小窗推杆位移
 		WindowPosition_Type,				//12  小窗推杆位移
-		0,
+		Gas_O2_Type,						//13 氧气
 		0,
 		0,
 		0,
@@ -86,7 +86,10 @@ void Sensor_Init(void)
 			MHZ14CO2_Init();
 			break;
 		case Gas_NH3_Type:
-			ZE03NH3_Init();
+			ZE03GAS_Init();
+			break;
+		case Gas_O2_Type:
+			ZE03GAS_Init();
 			break;
 		case Illumination_Type:
 			BH1750_Init();

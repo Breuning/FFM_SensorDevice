@@ -28,7 +28,6 @@ UART_RECEIVETYPE LoraUart_RX;
 UART_RECEIVETYPE GasUart_RX;
 UART_RECEIVETYPE RS485Uart_RX;
 
-uint8_t UsartAllowSend = false;
 
 /* USER CODE END 0 */
 

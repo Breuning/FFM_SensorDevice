@@ -25,6 +25,7 @@ typedef struct
 
     uint16_t CO2_Data;
     uint16_t NH3_Data;
+    uint16_t O2_Data;
 
     uint16_t Illumination;
     uint16_t WindowPosition;

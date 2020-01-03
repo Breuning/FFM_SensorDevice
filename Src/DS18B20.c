@@ -9,6 +9,18 @@
 #include "tim.h"
 #include "main.h"
 #include "string.h"
+#include <stdio.h>
+#include "SensorAnalysis.h"
+#include <stdlib.h>
+
+static void DS18B20_Rst(void);
+static uint8_t DS18B20_Check(void);
+static void DS18B20_Write_Byte(uint8_t dat);
+static uint8_t DS18B20_Read_Byte(void);
+static uint8_t DS18B20_Read_Bit(void);
+static uint8_t B20DataCheckCRC(uint8_t *p, uint8_t len);
+static void DS18B20_DQ_IN(void);
+static void DS18B20_DQ_OUT(void);
 
 
 const uint8_t DS18B20_CRC_Tab[256]=
@@ -37,19 +49,20 @@ const uint8_t DS18B20_CRC_Tab[256]=
 //	@parameters:  void
 //	@return:	   温度值 (-550~1250, 精度为0.1C)
 //--------------------------------------------------------------------------------------------
-uint16_t DS18B20_Get_Temp(void)
+uint8_t GetWaterTemFrom18B20(void)
 {
-		uint8_t temp;
+		uint8_t temp;                //温度正负标志
 		uint8_t tem_L, tem_H;
-		uint16_t tem;
+		short tem;
 
-		uint8_t B20DataCRC[9];
+		uint8_t B20Data[9];
 
-		static uint16_t PreTem=0;
-		static uint16_t EffectTem=0;
+		uint16_t EffectTem = 0;
 
 		DS18B20_Rst();
-		DS18B20_Check();
+		if(DS18B20_Check())
+			return 1;
+
 		DS18B20_Write_Byte(0xcc);    // 0xcc 跳过ROM指令  当总线上只有一个器件的时候，可以跳过 ROM，不进行ROM检测
 		DS18B20_Write_Byte(0x44);    // 0x44 启动温度转化命令   启动一次温度转换
 		HAL_Delay(750);              // 最大的转换时间是 750ms, 当启动转换后，至少要再等 750ms 之后才能读取温度
@@ -60,59 +73,49 @@ uint16_t DS18B20_Get_Temp(void)
 		DS18B20_Write_Byte(0xbe);    // 0xbe 读暂存寄存器指令   读取温度数值
 
 		//读取高速暂存存储器9个字节的数据
-		B20DataCRC[0]=DS18B20_Read_Byte();   //温度低位数据
-		B20DataCRC[1]=DS18B20_Read_Byte();   //温度高位数据
-		B20DataCRC[2]=DS18B20_Read_Byte();   //TH值
-		B20DataCRC[3]=DS18B20_Read_Byte();   //TL值
-		B20DataCRC[4]=DS18B20_Read_Byte();   //配置寄存器值
-		B20DataCRC[5]=DS18B20_Read_Byte();   //第6~8字节未用，表现为全逻辑1
-		B20DataCRC[6]=DS18B20_Read_Byte();
-		B20DataCRC[7]=DS18B20_Read_Byte();
-		B20DataCRC[8]=DS18B20_Read_Byte();   //前面所有8个字节的CRC码，可用来保证通信正确
+		B20Data[0]=DS18B20_Read_Byte();   //温度低位数据
+		B20Data[1]=DS18B20_Read_Byte();   //温度高位数据
+		B20Data[2]=DS18B20_Read_Byte();   //TH值
+		B20Data[3]=DS18B20_Read_Byte();   //TL值
+		B20Data[4]=DS18B20_Read_Byte();   //配置寄存器值
+		B20Data[5]=DS18B20_Read_Byte();   //第6~8字节未用，表现为全逻辑1
+		B20Data[6]=DS18B20_Read_Byte();
+		B20Data[7]=DS18B20_Read_Byte();
+		B20Data[8]=DS18B20_Read_Byte();   //前面所有8个字节的CRC码，可用来保证通信正确
 
-		if(B20DataCheckCRC(B20DataCRC,9)==0)
+		if(B20DataCheckCRC(B20Data,9) == 0)
 		{
-			tem_L = B20DataCRC[0];     		 //读取的温度低位数据
-			tem_H = B20DataCRC[1];     		 //读取的温度高位数据
+			tem_L = B20Data[0];     		 //读取的温度低位数据
+			tem_H = B20Data[1];     		 //读取的温度高位数据
 
-			if(tem_H>7)                 	 //TH大于7则符号位为1
+			if(tem_H>7)                 	 //高八位大于7则符号位为1
 			{
-				tem_H=~tem_H;             	 //将补码变换为原码
-				tem_L=~tem_L;
-				temp=0;                      //温度为负
-			}
-			else
-				temp=1;                      //温度为正
-			tem=tem_H;                       //获得高八位
-			tem<<=8;
-			tem+=tem_L;                      //获得低八位
-			tem=(float)tem*0.625;            //转换
-			if(FilterAlgorithm(&tem))
-			{
-				if(tem == 0)
-				{
-					tem = 11;
-				}
-				if(temp)
-				{
-					EffectTem = tem;
-				}
-				else
-				{
-					EffectTem = (uint16_t)abs(tem);
-					EffectTem |= 0x8000;
-
-				}
-				PreTem  = EffectTem;
-//				UsartAllowSend = true;
-				return EffectTem;     //返回温度值
+				tem_H = ~tem_H;              //将补码变换为原码
+				tem_L = ~tem_L;
+				temp = 0;                    //温度为负
 			}
 			else
 			{
-				return PreTem;
+				temp = 1;                    //温度为正
+			}
+			tem = (tem_H << 8) + tem_L;
+			tem = (float)tem * 0.625;        //转换，10倍值传输，正常值为 * 0.0625
+
+
+			if(temp)
+			{
+				EffectTem = tem;
+			}
+			else
+			{
+				EffectTem = (uint16_t)abs(tem);
+				EffectTem |= 0x8000;
 			}
 		}
-		return PreTem;
+
+		Sensor_Data.WaterTemperature = EffectTem;     //返回温度值
+		Tick_GetSensorData = HAL_GetTick();
+		return 0;
 }
 
 //--------------------------------------------------------------------------------------------
@@ -170,21 +173,21 @@ static void DS18B20_Write_Byte(uint8_t dat)
 		uint8_t testb;
 		DS18B20_DQ_OUT();           // DS18B20_DQ脚配置为输出模式
 
-		for (i=1; i<=8; i++)
+		for (i = 1; i <= 8; i++)
 		{
-			testb=dat&0x01;         // dat末位是0返回0，末位是1返回1
-			dat=dat>>1;				// dat右移一位
+			testb = dat & 0x01;     // dat末位是0返回0，末位是1返回1
+			dat = dat >> 1;		    // dat右移一位
 			if (testb)              // 末位是1，即写入1
 			{
 				DS18B20_DQ_LOW();   // Write 1
 				Delay_us(2);        // 拉低大于1us
 				DS18B20_DQ_HIGH();
-				Delay_us(60);       // 拉高持续时间要大于 60us，DS18B20 会在15us到 60us之间来读取这个1
+				Delay_us(70);       // 拉高持续时间要大于 60us，DS18B20 会在15us到 60us之间来读取这个1
 			}
 			else                    // 末位是0，即写入0
 			{
 				DS18B20_DQ_LOW();   // Write 0
-				Delay_us(60);       // 拉低60~120us，DS18B20 会在从 15us到60us之间的时间来读取这个0
+				Delay_us(70);       // 拉低60~120us，DS18B20 会在从 15us到60us之间的时间来读取这个0
 				DS18B20_DQ_HIGH();
 				Delay_us(2);
 			}
@@ -199,10 +202,10 @@ static uint8_t DS18B20_Read_Byte(void)
 {
 		uint8_t i,j,dat;
 		dat=0;
-		for (i=1; i<=8; i++)
+		for (i = 1; i <= 8; i++)
 		{
-			j=DS18B20_Read_Bit();
-			dat=(j<<7)|(dat>>1);
+			j = DS18B20_Read_Bit();
+			dat = (j<<7)|(dat>>1);
 		}
 		return dat;
 }
@@ -217,15 +220,13 @@ static uint8_t DS18B20_Read_Bit(void)
 
 		DS18B20_DQ_OUT();
 		DS18B20_DQ_LOW();
-		Delay_us(2);         //拉低至少保持1us的时间
-		DS18B20_DQ_HIGH();
+		Delay_us(10);         //拉低至少保持1us的时间,从拉低引脚到读取引脚状态,不能超过 15us(建议设为10，11，12)
 
 		DS18B20_DQ_IN();
-		Delay_us(12);       //从拉低引脚到读取引脚状态，不能超过 15us
 		if(DS18B20_DQ_IN_Read)
-			data=1;
+			data = 1;
 		else
-			data=0;
+			data = 0;
 		Delay_us(50);       //读取完成后需延时至少45us
 		return data;
 }
@@ -233,6 +234,7 @@ static uint8_t DS18B20_Read_Bit(void)
 //--------------------------------------------------------------------------------------------
 //	@funtion:	  DS18B20_DQ脚配置为输入模式
 //--------------------------------------------------------------------------------------------
+/*此方法占用时间太久，几十个us
 static void DS18B20_DQ_IN(void)
 {
 		GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -242,10 +244,16 @@ static void DS18B20_DQ_IN(void)
 		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 		HAL_GPIO_Init(DS18B20_DQ_GPIO_Port, &GPIO_InitStruct);
 }
-
+*/
+static void DS18B20_DQ_IN(void)
+{
+	GPIOB->CRH &= 0XFFFFFFF0;
+	GPIOB->CRH |= 8 << 0;
+}
 //--------------------------------------------------------------------------------------------
 //	@funtion:	  DS18B20_DQ脚配置为输出模式
 //--------------------------------------------------------------------------------------------
+/*此方法占用时间太久，几十个us
 static void DS18B20_DQ_OUT(void)
 {
 		GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -255,41 +263,26 @@ static void DS18B20_DQ_OUT(void)
 		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 		HAL_GPIO_Init(DS18B20_DQ_GPIO_Port, &GPIO_InitStruct);
 }
+*/
+static void DS18B20_DQ_OUT(void)
+{
+	GPIOB->CRH &= 0XFFFFFFF0;
+	GPIOB->CRH |= 3 << 0;
+}
 
 //--------------------------------------------------------------------------------------------
 //	@funtion:	    查表法计算CRC
 //--------------------------------------------------------------------------------------------
-static uint8_t B20DataCheckCRC(uint8_t *p,uint8_t len )
+static uint8_t B20DataCheckCRC(uint8_t *p, uint8_t len)
 {
-		uint8_t i=0;
-		uint8_t DS18B20_CRC_result=0;
-		for(i=0; i<len; i++)
+		uint8_t i = 0;
+		uint8_t DS18B20_CRC_result = 0;
+		for(i = 0; i < len; i++)
 			DS18B20_CRC_result = DS18B20_CRC_Tab[(*p++) ^ DS18B20_CRC_result];
 		return DS18B20_CRC_result;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/*朱泽鹏写的滤波算法，暂时不用
 static uint8_t FilterAlgorithm(short* tem)//DS18B20滤波算法
 {
 		static short RegularTemperature[SIZE]={0};//常规温度数据
@@ -378,7 +371,7 @@ static uint8_t FilterAlgorithm(short* tem)//DS18B20滤波算法
 			return 1;
 		}
 }
-
+*/
 
 
 

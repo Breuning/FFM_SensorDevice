@@ -233,7 +233,7 @@ void GetValidDataFromPressure(void)
     v = (float)ADC_Average(&hadc1, 10);          //10次数据的平均值
     v = v * 3.3/4095.0;			                 //采集到的实际电压值
 
-    if(v < 0.64)
+    if(v < 0.4)               //电压如果小于0.64V认为探头离线
     	return;
     else
     	Tick_GetSensorData = HAL_GetTick();
@@ -260,18 +260,14 @@ void GetValidDataFromWindowPos(void)
 	v =(float)ADC_Average(&hadc1, 10);      		            //10次数据的平均值
 	v = v * 3.3 / 4095.0;                                       //采集到的实际电压值
 
-    if(v < 0.64)
-    {
+    if(v < 0.4)                 //电压如果小于0.64V认为探头离线
     	return;
-    }
     else
-    {
     	Tick_GetSensorData = HAL_GetTick();
-    }
 
 	l = (((v / 160) * 1000 )- 4) * ((1000 - 0) / (20 - 4));     //电压值转换为相应的位移值
 
-	l = l + 20;             //实际测量校正
+	l = l + 20;             //实际测量校正，拉线头有20mm
 
     if(l > 600)
     {
@@ -309,6 +305,7 @@ void Get_WindowPos_NewPushrod(void)
 		r = 0;
 	}
 
+	Tick_GetSensorData = HAL_GetTick();
 	Sensor_Data.WindowPosition = (uint16_t)r;
 
 }

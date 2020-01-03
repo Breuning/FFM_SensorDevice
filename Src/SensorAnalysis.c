@@ -15,6 +15,7 @@
 #include "Gas.h"
 #include "FilterAlgorithm.h"
 #include "tim.h"
+#include "DS18B20.h"
 
 BOOL SensorReadTimerFlag = FALSE;
 Sensor_Data_Struct Sensor_Data;
@@ -32,6 +33,7 @@ void SensorAnalysis(void)
 	{
 		Get_SensorData();
 
+
 /**********调试用, 将获取的传感器数值输出在SensorData_Buff数组内,并将数组内的数据通过USART2发送至PC**********/
 
 		memset(SensorData_Buff, 0 , sizeof(SensorData_Buff));
@@ -42,7 +44,7 @@ void SensorAnalysis(void)
 //		sprintf(SensorData_Buff, "CO2: %d \r", Sensor_Data.CO2_Data);
 //		sprintf(SensorData_Buff, "Pressure: %d \r", Sensor_Data.NegativePressure);
 //		sprintf(SensorData_Buff, "Windowpos: %d \r", Sensor_Data.WindowPosition);
-		sprintf(SensorData_Buff, "WaterTem: %d \r", Sensor_Data.WindowPosition);
+		sprintf(SensorData_Buff, "WaterTem: %d \r", Sensor_Data.WaterTemperature);
 
 		//将数组内的数据通过USART2发送至PC
 		HAL_UART_Transmit(&huart2, (uint8_t *)SensorData_Buff, strlen(SensorData_Buff), 100);
@@ -68,9 +70,12 @@ void Get_SensorData(void)
 			FiltetAlgorithmforSensors(Sensor_Data.Humidity, &filter[1]);
 			break;
 		case Water_Temperature_Type:
-			GetWaterTemFromNTC();
-//			Sensor_Data.Water_Temperature = DS18B20_Get_Temp();
+			if(GetWaterTemFrom18B20())
+			{
+				GetWaterTemFromNTC();
+			}
 			FiltetAlgorithmforSensors(Sensor_Data.WaterTemperature, &filter[2]);
+			LimitBreadthFilter(Sensor_Data.WaterTemperature);
 			break;
 		case Negative_Pressure_Type:
 			GetValidDataFromPressure();
@@ -81,8 +86,12 @@ void Get_SensorData(void)
 			FiltetAlgorithmforSensors(Sensor_Data.CO2_Data, &filter[4]);
 			break;
 		case Gas_NH3_Type:
-			GetValidDataFromZE03NH3();
+			GetValidDataFromZE03GAS(Sensor_Type);
 			FiltetAlgorithmforSensors(Sensor_Data.NH3_Data, &filter[5]);
+			break;
+		case Gas_O2_Type:
+			GetValidDataFromZE03GAS(Sensor_Type);
+			FiltetAlgorithmforSensors(Sensor_Data.O2_Data, &filter[5]);
 			break;
 		case Illumination_Type:
 			GetValidDataFromBH1750();

@@ -92,6 +92,7 @@ void Master_SensorData_Ack(uint8_t DEV_ADDR, uint8_t DEV_TYPE)
 		Master51AckBuf[MASTER_51ACK_CRCVAL_LOW_NUM]  = (uint8_t)CRC16(Master51AckBuf,6);
 
 		RS485Uart_RX_TX_Switch(TRANSMIT);   //485发送打开
+		HAL_Delay(5);
 		HAL_UART_Transmit(&huart4, (uint8_t *)Master51AckBuf, sizeof(Master51AckBuf), 1000);
 		RS485Uart_RX_TX_Switch(RECEIVE);    //485接收打开，发送截止
 
@@ -183,6 +184,17 @@ void Master_SensorData_Ack(uint8_t DEV_ADDR, uint8_t DEV_TYPE)
 				Master52AckBuf[10] = (uint8_t)CRC16(Master52AckBuf, 9);
 
 				break;
+			case Gas_O2_Type:
+				Master52AckBuf[2]  = 0x0B;
+				Master52AckBuf[5]  = Gas_O2_Type;
+				Master52AckBuf[6]  = 0x02;
+				Master52AckBuf[7]  = (uint8_t)(Sensor_Data.O2_Data >> 8);
+				Master52AckBuf[8]  = (uint8_t)Sensor_Data.O2_Data;
+
+				Master52AckBuf[9]  = (uint8_t)(CRC16(Master52AckBuf, 9)>> 8);
+				Master52AckBuf[10] = (uint8_t)CRC16(Master52AckBuf, 9);
+
+				break;
 			case Illumination_Type:
 				Master52AckBuf[2]  = 0x0B;
 				Master52AckBuf[5]  = Illumination_Type;
@@ -210,6 +222,7 @@ void Master_SensorData_Ack(uint8_t DEV_ADDR, uint8_t DEV_TYPE)
 		}
 
 		RS485Uart_RX_TX_Switch(TRANSMIT);   //485发送打开
+		HAL_Delay(5);
 		HAL_UART_Transmit(&huart4, (uint8_t *)Master52AckBuf, sizeof(Master52AckBuf), 1000);
 		RS485Uart_RX_TX_Switch(RECEIVE);    //485接收打开，发送截止
 
@@ -287,6 +300,7 @@ void ModBus_SensorData_Ack(uint8_t DEV_ADDR)
 
 
 	RS485Uart_RX_TX_Switch(TRANSMIT);   //485发送打开
+	HAL_Delay(1);
 	HAL_UART_Transmit(&huart4, (uint8_t *)ModbusAckBuf, sizeof(ModbusAckBuf), 1000);
 	RS485Uart_RX_TX_Switch(RECEIVE);    //485接收打开，发送截止
 

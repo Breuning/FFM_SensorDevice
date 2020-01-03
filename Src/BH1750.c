@@ -31,10 +31,10 @@ void GetValidDataFromBH1750(void)
 
 	HAL_I2C_Master_Receive(&hi2c1, BH1750Addr_Read, BH1750_Data_Buffer, 2, 0xff);    		//接收传感器返回的数据值放到BH1750_Data_Buffer
 
-	if(strlen(BH1750_Data_Buffer) != 0)
-	{
+	if(BH1750_Data_Buffer[0] == 0 && BH1750_Data_Buffer[1] == 0)
+		return;
+	else
 		Tick_GetSensorData = HAL_GetTick();
-	}
 
 	Sensor_Data.Illumination = (float)((BH1750_Data_Buffer[0] << 8) + BH1750_Data_Buffer[1])/1.2;
 	Sensor_Data.Illumination = (uint16_t)(Sensor_Data.Illumination*1.4);

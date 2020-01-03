@@ -20,6 +20,6 @@ typedef struct
 
 extern FILTER filter[10];
 void FiltetAlgorithmforSensors(uint16_t SersorData, FILTER *Filter);
-
+void LimitBreadthFilter(uint16_t SensorData);
 
 #endif /* FILTERALGORITHM_H_ */

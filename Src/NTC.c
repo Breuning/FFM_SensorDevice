@@ -256,7 +256,7 @@ const ntcData_t ntc_3950_data[] =
 
 BOOL NTC_ifAvailable(float valueOfResistance )
 {
-	if ((valueOfResistance > 100) || (valueOfResistance < 0.4))
+	if ((valueOfResistance > 90) || (valueOfResistance < 0.4))
 	{
 		return FALSE;
 	}
@@ -274,9 +274,9 @@ void GetWaterTemFromNTC(void)
 	r = NTC_PUSH_UP_RESISTOR_KR / (3.3/r - 1);    //电压值转化为电阻值
 
 	if(NTC_ifAvailable(r) != TRUE)
-	{
 		return;
-	}
+	else
+		Tick_GetSensorData = HAL_GetTick();
 
 
 	if(r > 95.3)
