@@ -1,4 +1,3 @@
-
 /**
   ******************************************************************************
   * File Name          : ADC.c
@@ -7,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under BSD 3-Clause license,
@@ -270,10 +269,10 @@ void GetValidDataFromWindowPos(void)
 
 	l = l + 20;             //实际测量校正，拉线头有20mm
 
-    if(l > 600)
-    {
-    	l = 600;
-    }
+//    if(l > 600)
+//    {
+//    	l = 600;
+//    }
     if(l < 0)
     {
     	l = 0;

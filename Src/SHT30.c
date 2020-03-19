@@ -19,13 +19,14 @@ uint8_t SHT30_Data_Buffer[6] = {0};                         //Byte0和1为温度,Byt
 
 
 void SHT30_Init(void)
-{
-	HAL_I2C_Master_Transmit(&hi2c1, SHT30Addr_Write, SHT30_Modecommand_Buffer, 2, 1000);      //SHT30传感器周期性的进行温湿度转换
+{//初始化移到循环
+ //	HAL_I2C_Master_Transmit(&hi2c1, SHT30Addr_Write, SHT30_Modecommand_Buffer, 2, 1000);      //SHT30传感器周期性的进行温湿度转换
 }
 
 void GetValidDataFromSHT30(void)
 {
-
+	HAL_I2C_Master_Transmit(&hi2c1, SHT30Addr_Write, SHT30_Modecommand_Buffer, 2, 1000);
+	HAL_Delay(5);
 	HAL_I2C_Master_Transmit(&hi2c1, SHT30Addr_Write, SHT30_Fetchcommand_Buffer, 2, 1000);     //发送获取传感器数据的命令
 	HAL_I2C_Master_Receive (&hi2c1, SHT30Addr_Read, SHT30_Data_Buffer, 6, 1000);			  //接收传感器返回的数据值放到SHT30_Data_Buffer
 

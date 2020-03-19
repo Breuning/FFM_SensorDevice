@@ -301,6 +301,6 @@ void GetWaterTemFromNTC(void)
 		}
 	}
 
-	Sensor_Data.WaterTemperature = (uint16_t)(t * 10);               //温度值放大10倍传输
+	Sensor_Data.WaterTemperature = (uint16_t)(t * 10 - 20);               //温度值放大10倍传输, 根据实际测量得到NTC偏高2度左右
 }
 

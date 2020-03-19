@@ -29,7 +29,7 @@ void RS485Analysis(void)
 			MasterData_Analysis();
 		}
 
-		if((RS485Uart_RX.RX_Buf[0] != 0xFF) && (RS485Uart_RX.RX_Buf[1] == 0x03))             //Modbus标准传输协议，PLC传输过来
+		else if((RS485Uart_RX.RX_Buf[0] != 0xFF) && (RS485Uart_RX.RX_Buf[1] == 0x03))        //Modbus标准传输协议，PLC传输过来
 		{
 			ModbusData_Analysis();
 		}
@@ -49,7 +49,8 @@ void MasterData_Analysis(void)
 	uint16_t Master_CrcVal;
     uint16_t Master_CheckCrc;
 
-	if(RS485Uart_RX.rx_len != RS485Uart_RX.RX_Buf[MASTER_DATA_LEN_NUM])
+
+	if(RS485Uart_RX.rx_len < RS485Uart_RX.RX_Buf[MASTER_DATA_LEN_NUM])
 		return;
 
 	Master_CrcVal   = (RS485Uart_RX.RX_Buf[MASTER_CRCVAL_HIGH_NUM]<<8) | RS485Uart_RX.RX_Buf[MASTER_CRCVAL_LOW_NUM];  //数据包中的CRC校验值
@@ -284,6 +285,10 @@ void ModBus_SensorData_Ack(uint8_t DEV_ADDR)
 			ModbusAckBuf[REG2_VAL_HIGH_NUM] = (uint8_t)(Sensor_Data.Humidity >> 8);
 			ModbusAckBuf[REG2_VAL_LOW_NUM]  = (uint8_t)Sensor_Data.Humidity;
 			break;
+		case NEGPRE_MODBUS_SLAVE_ADDR:
+			ModbusAckBuf[REG1_VAL_HIGH_NUM] = (uint8_t)(Sensor_Data.NegativePressure >> 8);
+		    ModbusAckBuf[REG1_VAL_LOW_NUM]  = (uint8_t)Sensor_Data.NegativePressure;
+		    break;
 		case CO2_MODBUS_SLAVE_ADDR:
 			ModbusAckBuf[REG1_VAL_HIGH_NUM] = (uint8_t)(Sensor_Data.CO2_Data >> 8);
 			ModbusAckBuf[REG1_VAL_LOW_NUM]  = (uint8_t)Sensor_Data.CO2_Data;
