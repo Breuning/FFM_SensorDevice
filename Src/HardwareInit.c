@@ -47,20 +47,25 @@ void Get_SensorType(void)
 		Illumination_Type,					//10  光照
 		WindowPosition_Type,				//11  小窗推杆位移
 		WindowPosition_Type,				//12  小窗推杆位移
-		Gas_O2_Type,						//13 氧气
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
+		Gas_O2_Type,						//13  氧气
+		Water_Meter_Type,                   //14  水表
+		Alarm_Type,                         //15  报警器
+		Temperature_Humidity_Type,			//16  室内温湿度
+		Temperature_Humidity_Type,			//17  室内温湿度
+		Temperature_Humidity_Type,			//18  室内温湿度
+		Temperature_Humidity_Type,			//19  室内温湿度
+		Temperature_Humidity_Type,			//20  室内温湿度
 		Temperature_Humidity_Type,			//21  室内温湿度
 		Temperature_Humidity_Type,			//22  室内温湿度
 		Temperature_Humidity_Type,			//23  室内温湿度
 		Temperature_Humidity_Type,			//24  室内温湿度
 		Temperature_Humidity_Type,			//25  室内温湿度
 		Temperature_Humidity_Type,			//26  室内温湿度
+		Water_Temperature_Type,				//27  水温
+		Negative_Pressure_Type,				//28  负压
+		Gas_CO2_Type,						//29  二氧化碳
+		Gas_NH3_Type,						//30  氨气
+
 	};
 
 	Sensor_Type = Type[Sensor_ID];

@@ -17,6 +17,7 @@ uint32_t Tick_RS485Ack;
 uint8_t Master51AckBuf[8]  = {0};
 uint8_t Master52AckBuf[15] = {0};
 
+
 uint8_t ModbusAckBuf[9] = {0};
 
 void RS485Analysis(void)
@@ -274,6 +275,8 @@ void ModBus_SensorData_Ack(uint8_t DEV_ADDR)
 	ModbusAckBuf[SLAVE_DEV_ADDR_NUM2] = DEV_ADDR;
     ModbusAckBuf[FUNC_NUM2]           = FUNC_VALUE_READ;
     ModbusAckBuf[BYTES_NUM]           = 4;
+
+
 	switch(DEV_ADDR)
 	{
 		case TEMHUM_MODBUS_SLAVE_ADDR2:
