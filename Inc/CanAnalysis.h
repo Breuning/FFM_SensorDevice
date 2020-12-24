@@ -46,22 +46,37 @@ typedef enum
 
 }CanSensor_t;
 
+//typedef struct
+//{
+//
+//	CanBoard_t   CanBoardType;
+//	CanSensor_t  CanSensorType;
+//	uint8_t      CanSensorNum;
+//
+//}CanIdConstruction_t;
+
 typedef struct
 {
-
-	CanBoard_t   CanBoardType;
-	CanSensor_t  CanSensorType;
-	uint8_t      CanSensorNum;
-
+	uint32_t Aid     :8;
+	uint32_t Tid     :7;
+	uint32_t Bid     :2;
+	uint32_t FreeBit :12;
+	uint32_t NotUse  :3;
 }CanIdConstruction_t;
 
 typedef union
 {
-	uint16_t             OriginId;
-	CanIdConstruction_t  Resolve;
-}StdIdResolve_t;
+	CanIdConstruction_t ResolveId;
+	uint32_t             OriginId;
+}CanIdResolve_t;
+
+
 
 extern BOOL CanDataSendTimerFlag;
+extern BOOL CanDataSendTimerFlag_Intime;
+
 void CanAnalysis(void);
+uint16_t Get_CanSensor_FrameID(uint8_t sensorid);
+CanSensor_t Get_CanSensor_Type(uint8_t sensorid);
 
 #endif /* CANANALYSIS_H_ */

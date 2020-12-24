@@ -11,6 +11,7 @@
 #include "BH1750.h"
 #include "Gas.h"
 #include "RS485Analysis.h"
+#include "CanAnalysis.h"
 #include "Led.h"
 #include "can.h"
 
@@ -23,9 +24,10 @@ void Hardware_Init(void)
 	Get_SensorType();						//根据拨码获取传感器类型
 	Sensor_Init();
 	RS485_Init();
-	CAN_Config_Init();
+	Can_Init();
 	LoraNode_Init_Mode(MODE_CMD);
 	Led_Init();
+
     HAL_Delay(50);
 }
 
@@ -48,7 +50,7 @@ void Get_SensorType(void)
 		WindowPosition_Type,				//11  小窗推杆位移
 		WindowPosition_Type,				//12  小窗推杆位移
 		Gas_O2_Type,						//13  氧气
-		Water_Meter_Type,                   //14  水表
+		WaterMeter_Type,                    //14  水表
 		Alarm_Type,                         //15  报警器
 		Temperature_Humidity_Type,			//16  室内温湿度
 		Temperature_Humidity_Type,			//17  室内温湿度
@@ -65,6 +67,18 @@ void Get_SensorType(void)
 		Negative_Pressure_Type,				//28  负压
 		Gas_CO2_Type,						//29  二氧化碳
 		Gas_NH3_Type,						//30  氨气
+		DeflectorPosition_Type,             //31 导流板位移
+		DeflectorPosition_Type,             //32 导流板位移
+		DeflectorPosition_Type,             //33 导流板位移
+		DeflectorPosition_Type,             //34 导流板位移
+		DeflectorPosition_Type,             //35 导流板位移
+		DeflectorPosition_Type,             //36 导流板位移
+		DeflectorPosition_Type,             //37 导流板位移
+		DeflectorPosition_Type,             //38 导流板位移
+		DeflectorPosition_Type,             //39 导流板位移
+		DeflectorPosition_Type,             //40 导流板位移
+		DeflectorPosition_Type,             //41 导流板位移
+		DeflectorPosition_Type,             //42 导流板位移
 
 	};
 
@@ -110,7 +124,11 @@ void RS485_Init(void)
 }
 
 
-
+void Can_Init(void)
+{
+	Get_CanSensor_FrameID(Sensor_ID);
+	CAN_Config_Init();
+}
 
 
 

@@ -34,11 +34,14 @@
 #define  Outside_Temperature_Type 			0xAA
 #define  Outside_Humidity_Type 				0xAB
 #define  Water_Temperature_Type 			0xAC
+#define  WindowPosition_Type 				0xAD
+#define  DeflectorPosition_Type 		    0xAE
+
 #define  Temperature_Humidity_Type 			0xC3
 #define  Outside_Temperature_Humidity_Type 	0xC4
-#define  WindowPosition_Type 				0xAD
+
 #define  Gas_O2_Type 						0xB1
-#define  Water_Meter_Type                   0xB2
+#define  WaterMeter_Type                    0xB2
 #define  Alarm_Type                         0xB3
 
 
@@ -47,6 +50,7 @@ void Get_SensorType(void);
 void Get_SensorID();
 void Sensor_Init(void);
 void RS485_Init(void);
+void Can_Init(void);
 
 extern uint8_t Sensor_Type;
 extern uint8_t Sensor_ID;

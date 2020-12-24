@@ -96,7 +96,7 @@ uint8_t SHT30_ClearStaus(void);																//清楚状态寄存器
 void SHT30_Get_TH(uint8_t *vTemSymbol, uint16_t *vTem, uint16_t *vHum);						//获取温湿度数据
 */
 
-
+void I2C_Reset(void);
 void SHT30_Init(void);
 void GetValidDataFromSHT30(void);
 void SHT30_Calc(uint8_t *vBuf, uint8_t *vTemSymbol, uint16_t *vTem, uint16_t *vHum);		//计算采集数据

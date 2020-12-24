@@ -19,6 +19,6 @@
 
 #define   DS18B20_DQ_IN_Read  HAL_GPIO_ReadPin(DS18B20_DQ_GPIO_Port, DS18B20_DQ_Pin)
 
-uint8_t GetWaterTemFrom18B20(void);
+uint8_t GetTemFrom18B20(void);
 
 #endif /* DS18B20_H_ */

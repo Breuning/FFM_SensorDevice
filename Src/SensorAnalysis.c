@@ -16,6 +16,7 @@
 #include "FilterAlgorithm.h"
 #include "tim.h"
 #include "DS18B20.h"
+#include "WaterMeter.h"
 
 BOOL SensorReadTimerFlag = FALSE;
 Sensor_Data_Struct Sensor_Data;
@@ -59,23 +60,26 @@ void Get_SensorData(void)
 {
 	switch (Sensor_Type)
 	{
-
+		case Temperature_Type:
 		case Temperature_Humidity_Type:
-
 		case Outside_Temperature_Humidity_Type:
-			GetValidDataFromSHT30();
-			FiltetAlgorithmforSensors(Sensor_Data.Temperature_u, &filter[0]);
-			TemperatureData_NegativeValueJudge();
+			if(GetTemFrom18B20())
+			{
+				Sensor_Type = Temperature_Humidity_Type;
 
-			FiltetAlgorithmforSensors(Sensor_Data.Humidity, &filter[1]);
+				GetValidDataFromSHT30();
+				FiltetAlgorithmforSensors(Sensor_Data.Temperature_u, &filter[0]);
+				TemperatureData_NegativeValueJudge();
+				FiltetAlgorithmforSensors(Sensor_Data.Humidity, &filter[1]);
+			}
 			break;
 		case Water_Temperature_Type:
-			if(GetWaterTemFrom18B20())
+			if(GetTemFrom18B20())
 			{
 				GetWaterTemFromNTC();
+				FiltetAlgorithmforSensors(Sensor_Data.WaterTemperature, &filter[2]);
+				LimitBreadthFilter(Sensor_Data.WaterTemperature);
 			}
-			FiltetAlgorithmforSensors(Sensor_Data.WaterTemperature, &filter[2]);
-			LimitBreadthFilter(Sensor_Data.WaterTemperature);
 			break;
 		case Negative_Pressure_Type:
 			GetValidDataFromPressure();
@@ -91,16 +95,20 @@ void Get_SensorData(void)
 			break;
 		case Gas_O2_Type:
 			GetValidDataFromZE03GAS(Sensor_Type);
-			FiltetAlgorithmforSensors(Sensor_Data.O2_Data, &filter[5]);
+			FiltetAlgorithmforSensors(Sensor_Data.O2_Data, &filter[6]);
 			break;
 		case Illumination_Type:
 			GetValidDataFromBH1750();
-			FiltetAlgorithmforSensors(Sensor_Data.Illumination, &filter[6]);
+			FiltetAlgorithmforSensors(Sensor_Data.Illumination, &filter[7]);
 			break;
 		case WindowPosition_Type:
 			GetValidDataFromWindowPos();
 //			Get_WindowPos_NewPushrod();             //新小窗推杆位移
-			FiltetAlgorithmforSensors(Sensor_Data.WindowPosition, &filter[7]);
+			FiltetAlgorithmforSensors(Sensor_Data.WindowPosition, &filter[8]);
+			break;
+		case WaterMeter_Type:
+			GetValidDataFromWaterMet();
+			FiltetAlgorithmforSensors(Sensor_Data.WaterMeter, &filter[9]);
 			break;
 		default:
 			break;
@@ -119,7 +127,7 @@ float GetFloatSensorData(FloatSensorDataType type)
 	SensorData_Float[CO2_Data] 		   = (float)Sensor_Data.CO2_Data;
 	SensorData_Float[NH3_Data]         = (float)Sensor_Data.NH3_Data;
 	SensorData_Float[Illumination]     = (float)Sensor_Data.Illumination;
-	SensorData_Float[WindDerection]    = (float)Sensor_Data.WindDerection;
+	SensorData_Float[WindowPosition]   = (float)Sensor_Data.WindowPosition;
 	SensorData_Float[WaterMeter]       = (float)Sensor_Data.WaterMeter;
 
 

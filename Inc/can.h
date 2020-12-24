@@ -33,7 +33,7 @@
 extern CAN_HandleTypeDef hcan;
 
 /* USER CODE BEGIN Private defines */
-
+#define Main_MASTER_CanId 0x08
 /* USER CODE END Private defines */
 
 void MX_CAN_Init(void);

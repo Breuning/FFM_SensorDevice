@@ -174,19 +174,19 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	}
 }
 
-//--------------------------------------------------------------------------------------------
-//	 @function:    CAN功能开启配置初始化,过滤器配置(接收用),设置为接收所有报文数据（即暂时不过滤）
-//--------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------
+//	 @function:    CAN功能开启配置初始化,过滤器配置(接收用),设置为只接收来自0x08（环控主机）的数据，屏蔽其他ID的数据
+//--------------------------------------------------------------------------------------------------------------
 void CAN_Config_Init(void)
 {
 	CAN_FilterTypeDef CAN_FilterType;
 	CAN_FilterType.FilterBank=0;							//选择过滤器组0
-	CAN_FilterType.FilterIdHigh=0x0000;                     //要过滤的ID高16位
-	CAN_FilterType.FilterIdLow=0x0000;                      //要过滤的ID低16位
+	CAN_FilterType.FilterIdHigh=(((uint32_t)Main_MASTER_CanId<<3)&0xFFFF0000)>>16;                     //要过滤的ID高16位
+	CAN_FilterType.FilterIdLow=(((uint32_t)Main_MASTER_CanId<<3)|CAN_ID_EXT|CAN_RTR_DATA)&0xFFFF;      //要过滤的ID低16位
 	CAN_FilterType.FilterMaskIdHigh=0x0000;            		//过滤器屏蔽寄存器高16位
 	CAN_FilterType.FilterMaskIdLow=0x0000;					//过滤器屏蔽寄存器低16位
 	CAN_FilterType.FilterFIFOAssignment=CAN_RX_FIFO0;		//设定了指向过滤器的FIFO为0，过滤器将ID报文关联到FIFO0缓存区中，数据只能从这里导出
-	CAN_FilterType.FilterMode=CAN_FILTERMODE_IDMASK;		//指定过滤器为标识符屏蔽位模式，CAN_FILTERMODE_IDLIST为标识符列表模式
+	CAN_FilterType.FilterMode=CAN_FILTERMODE_IDLIST;		//指定过滤器为标识符列表模式，CAN_FILTERMODE_IDMASK为标识符屏蔽位模式
 	CAN_FilterType.FilterScale=CAN_FILTERSCALE_32BIT; 		//过滤器位宽为32位
 	CAN_FilterType.FilterActivation=ENABLE;					//过滤器使能
 	CAN_FilterType.SlaveStartFilterBank=14;					//选择CAN总线从机开始的过滤器组为14

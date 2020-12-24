@@ -18,7 +18,7 @@ typedef struct
 	uint16_t SampleBuff[SAMPLE_NUMBER]; 	 	//定义存储数据的数组
 }FILTER;
 
-extern FILTER filter[10];
+extern FILTER filter[20];
 void FiltetAlgorithmforSensors(uint16_t SersorData, FILTER *Filter);
 void LimitBreadthFilter(uint16_t SensorData);
 

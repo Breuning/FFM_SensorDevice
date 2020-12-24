@@ -10,7 +10,7 @@
 #include "SHT30.h"
 
 
-FILTER filter[10] = {0};
+FILTER filter[20] = {0};
 
 static uint16_t smoothaverage_lib_X(uint16_t smootnum,uint16_t *arraydata);
 

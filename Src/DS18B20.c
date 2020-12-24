@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include "SensorAnalysis.h"
 #include <stdlib.h>
+#include "HardwareInit.h"
+#include "FilterAlgorithm.h"
 
 static void DS18B20_Rst(void);
 static uint8_t DS18B20_Check(void);
@@ -49,7 +51,7 @@ const uint8_t DS18B20_CRC_Tab[256]=
 //	@parameters:  void
 //	@return:	   温度值 (-550~1250, 精度为0.1C)
 //--------------------------------------------------------------------------------------------
-uint8_t GetWaterTemFrom18B20(void)
+uint8_t GetTemFrom18B20(void)
 {
 		uint8_t temp;                //温度正负标志
 		uint8_t tem_L, tem_H;
@@ -113,7 +115,19 @@ uint8_t GetWaterTemFrom18B20(void)
 			}
 		}
 
-		Sensor_Data.WaterTemperature = EffectTem;     //返回温度值
+		FiltetAlgorithmforSensors(EffectTem, &filter[11]);
+		LimitBreadthFilter(EffectTem);
+
+		if(Sensor_Type == Water_Temperature_Type)
+		{
+			Sensor_Data.WaterTemperature = EffectTem;     //返回温度值
+		}
+		else if(Sensor_Type == Temperature_Humidity_Type || Sensor_Type == Temperature_Type)
+		{
+			Sensor_Type = Temperature_Type;
+			Sensor_Data.Temperature_m = EffectTem;
+		}
+
 		Tick_GetSensorData = HAL_GetTick();
 		return 0;
 }

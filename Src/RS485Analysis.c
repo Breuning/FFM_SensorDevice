@@ -68,6 +68,8 @@ void MasterData_Analysis(void)
 			LED2_MSGTX_Blink();
 			HAL_Delay(100);
 			LED2_MSGTX_Blink();					//长时间未读到探头数据时信号灯快速闪烁2次
+			HAL_Delay(100);
+			LED2_MSGTX_Blink();
 			return;
 		}
 		else
@@ -112,6 +114,17 @@ void Master_SensorData_Ack(uint8_t DEV_ADDR, uint8_t DEV_TYPE)
 
 		switch(DEV_TYPE)
 		{
+			case Temperature_Type:
+				Master52AckBuf[2]  = 0x0B;
+				Master52AckBuf[5]  = Temperature_Type;
+				Master52AckBuf[6]  = 0x02;
+				Master52AckBuf[7]  = (uint8_t)(Sensor_Data.Temperature_m >> 8);
+				Master52AckBuf[8]  = (uint8_t)Sensor_Data.Temperature_m;
+
+				Master52AckBuf[9]  = (uint8_t)(CRC16(Master52AckBuf, 9)>> 8);
+				Master52AckBuf[10] = (uint8_t)CRC16(Master52AckBuf, 9);
+
+				break;
 			case Temperature_Humidity_Type:
 				Master52AckBuf[2]  = 0x0F;
 				Master52AckBuf[5]  = Temperature_Type;

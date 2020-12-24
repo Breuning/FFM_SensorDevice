@@ -25,6 +25,9 @@ void SHT30_Init(void)
 
 void GetValidDataFromSHT30(void)
 {
+	I2C_Reset();
+	HAL_Delay(10);
+
 	HAL_I2C_Master_Transmit(&hi2c1, SHT30Addr_Write, SHT30_Modecommand_Buffer, 2, 1000);
 	HAL_Delay(5);
 	HAL_I2C_Master_Transmit(&hi2c1, SHT30Addr_Write, SHT30_Fetchcommand_Buffer, 2, 1000);     //发送获取传感器数据的命令
@@ -121,7 +124,44 @@ uint8_t SHT30_CheckCrc8(uint8_t *vDat, uint8_t vLen)
 }
 
 
+void I2C_Reset(void)
+{
+    /* 开漏输出，关闭I2C输入通道，并尝试将总线拉高 */
+    GPIO_InitTypeDef GPIO_InitStruct;
+    GPIO_InitStruct.Pin = I2C1_SCL_Pin|I2C1_SDA_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_WritePin(GPIOB, I2C1_SCL_Pin|I2C1_SDA_Pin, GPIO_PIN_SET);
 
+
+	while(HAL_GPIO_ReadPin(GPIOB, I2C1_SDA_Pin) == GPIO_PIN_RESET)
+	{
+		HAL_GPIO_TogglePin(GPIOB, I2C1_SCL_Pin);
+		Delay_us(10);
+		HAL_GPIO_TogglePin(GPIOB, I2C1_SCL_Pin);
+		Delay_us(10);
+	}
+
+
+	HAL_GPIO_WritePin(GPIOB, I2C1_SCL_Pin, GPIO_PIN_SET);
+
+	HAL_GPIO_WritePin(GPIOB, I2C1_SDA_Pin, GPIO_PIN_RESET);
+	Delay_us(10);
+	HAL_GPIO_WritePin(GPIOB, I2C1_SDA_Pin, GPIO_PIN_SET);
+
+
+    /* 归还总线控制权 */
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    /* 复位I2C */
+    hi2c1.Instance->CR1 |= I2C_CR1_SWRST;
+    hi2c1.Instance->CR1 &= ~I2C_CR1_SWRST;
+
+    /* 重新初始化I2C */
+    MX_I2C1_Init();
+}
 
 
 

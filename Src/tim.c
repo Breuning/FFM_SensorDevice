@@ -235,13 +235,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)     //定时器中断回调
 	if(htim == &htim3) // TIM3定时1s进来一次
 	{
 		HAL_GPIO_TogglePin(LED1_RUNNING_GPIO_Port, LED1_RUNNING_Pin); //运行灯反转
-
-		CanDataSendTimerFlag = TRUE;
+		CanDataSendTimerFlag_Intime = TRUE;
 	}
 
 
 	if(htim == &htim5) // TIM5定时5s进来一次
     {
+		CanDataSendTimerFlag = TRUE;
+
     	SensorReadTimerFlag = TRUE;
     	Time_cnt++;
 //    	htim->Instance->CNT = 0;                               		  //每次中断回调函数执行后进行计数器清零

@@ -53,7 +53,7 @@ typedef enum
 	CO2_Data,
 	NH3_Data,
 	Illumination,
-	WindDerection,
+	WindowPosition,
 	WaterMeter,
 
 }FloatSensorDataType;
